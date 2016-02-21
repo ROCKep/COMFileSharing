@@ -5,8 +5,43 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Cursach"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="File Transfer" Height="350" Width="350" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" Icon="NetGlobe.ico" Background="White" FontSize="12">
     <Grid>
-        
+        <TabControl x:Name="tabControl" HorizontalAlignment="Left" Height="322" VerticalAlignment="Top" Width="344" FontSize="12">
+            <TabItem Header="Главная">
+                <Grid Background="#FFE5E5E5">
+                    <Button x:Name="butBegin" Content="Настройки" HorizontalAlignment="Center" 
+                            Margin="10,10,10,10" VerticalAlignment="Center" Width="75" FontSize="12" Click="butBegin_Click"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="О Программе">
+                <Grid Background="#FFE5E5E5">
+                    <RichTextBox x:Name="richTextBox1" HorizontalAlignment="Center" Height="290" 
+                                 VerticalAlignment="Top" Width="334" IsEnabled="False" IsReadOnly="True" FontSize="12">
+                        <FlowDocument>
+                            <Paragraph FontWeight="Bold">
+                                <Run Text=""/>
+                            </Paragraph>
+                        </FlowDocument>
+                    </RichTextBox>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Информация">
+                <Grid Background="#FFE5E5E5">
+                    <RichTextBox x:Name="richTextBox2" HorizontalAlignment="Center" Height="290" 
+                                 VerticalAlignment="Top" Width="334" IsEnabled="False" IsReadOnly="True" FontSize="12">
+                        <FlowDocument>
+                            <Paragraph FontWeight="Bold">
+                                <Run Text=""/>
+                            </Paragraph>
+                        </FlowDocument>
+                    </RichTextBox>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+
+
+
     </Grid>
 </Window>
