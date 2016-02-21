@@ -8,7 +8,6 @@ namespace Cursach.PhysicalLayer
 {
     public class ComHandler
     {
-        public int iditevzhopu;
-        protected string nit;
+        
     }
 }
