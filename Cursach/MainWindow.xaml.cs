@@ -24,5 +24,12 @@ namespace Cursach
         {
             InitializeComponent();
         }
+
+        private void butBegin_Click(object sender, RoutedEventArgs e)
+        {
+            Settings w1 = new Settings();
+            this.Close();
+            w1.Show();
+        }
     }
 }
