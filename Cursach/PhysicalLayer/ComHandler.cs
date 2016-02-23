@@ -8,6 +8,6 @@ namespace Cursach.PhysicalLayer
 {
     public class ComHandler
     {
-        
+        protected int fuckYall;
     }
 }
