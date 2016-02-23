@@ -46,11 +46,53 @@ namespace Cursach
 
         private void butOpenCom_Click(object sender, RoutedEventArgs e)
         {
+            // Configure the message box to be displayed
+            string messageBoxText = "Вы собираетесь открыть COM-порт?";
+            string caption = "File Transer";
+            MessageBoxButton button = MessageBoxButton.YesNo;
+            MessageBoxImage icon = MessageBoxImage.Question;
+
+            // Display message box
+            MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+
+            // Process message box results
+            switch (result)
+            {
+                case MessageBoxResult.Yes:
+                    // User pressed Yes button
+                    // ...
+                    break;
+                case MessageBoxResult.No:
+                    // User pressed No button
+                    // ...
+                    break;
+            }
 
         }
 
         private void butCloseCom_Click(object sender, RoutedEventArgs e)
         {
+            // Configure the message box to be displayed
+            string messageBoxText = "Вы собираетесь закрыть COM-порт?";
+            string caption = "File Transer";
+            MessageBoxButton button = MessageBoxButton.YesNo;
+            MessageBoxImage icon = MessageBoxImage.Question;
+
+            // Display message box
+            MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+
+            // Process message box results
+            switch (result)
+            {
+                case MessageBoxResult.Yes:
+                    // User pressed Yes button
+                    // ...
+                    break;
+                case MessageBoxResult.No:
+                    // User pressed No button
+                    // ...
+                    break;
+            }
 
         }
 

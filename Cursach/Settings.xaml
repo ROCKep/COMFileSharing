@@ -54,23 +54,23 @@
                         <ComboBoxItem Content="Нечёт" ToolTip="Устанавливает бит чётности так, чтобы число установленных битов всегда было нечётным"/>
                         <ComboBoxItem Content="Пробел" ToolTip="Оставляет бит чётности равным 0"/>
                     </ComboBox>
-                    <Button x:Name="butOpenCom" Content="Открыть COM-порт" HorizontalAlignment="Center" Margin="0,240,150,0" VerticalAlignment="Top" Width="130" Click="butOpenCom_Click"/>
-                    <Button x:Name="butCloseCom" Content="Закрыть COM-порт" HorizontalAlignment="Center" Margin="150,240,0,0" VerticalAlignment="Top" Width="130" Click="butCloseCom_Click"/>
+                    <Button x:Name="butOpenCom" Content="Открыть COM-порт" HorizontalAlignment="Center" Margin="0,240,150,0" VerticalAlignment="Top"  Height="30" Width="130" Click="butOpenCom_Click"/>
+                    <Button x:Name="butCloseCom" Content="Закрыть COM-порт" HorizontalAlignment="Center" Margin="150,240,0,0" VerticalAlignment="Top"  Height="30" Width="130" Click="butCloseCom_Click"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Передача файла">
                 <Grid Background="#FFE5E5E5">
                     <Label Content="Имя файла:" HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top" FontSize="12"/>
-                    <TextBox x:Name="tbName" HorizontalAlignment="Left" Height="26" Margin="15,75,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="400" FontSize="12"/>
-                    <Button x:Name="butBrowse" Content="Поиск" HorizontalAlignment="Left" Margin="420,74,0,0" VerticalAlignment="Top" Height="26" Width="75" FontSize="12" Click="butBrowse_Click"/>
-                    <Button x:Name="butSend" Content="Отправить" HorizontalAlignment="Center" Margin="0,110,0,0" VerticalAlignment="Top" Height="26" Width="75" FontSize="12" Click="butSend_Click"/>
+                    <TextBox x:Name="tbName" HorizontalAlignment="Left" Height="30" Margin="15,75,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="400" FontSize="12"/>
+                    <Button x:Name="butBrowse" Content="Поиск" HorizontalAlignment="Left" Margin="420,74,0,0" VerticalAlignment="Top" Height="30" Width="80" FontSize="12" Click="butBrowse_Click"/>
+                    <Button x:Name="butSend" Content="Отправить" HorizontalAlignment="Center" Margin="0,110,0,0" VerticalAlignment="Top" Height="30" Width="80" FontSize="12" Click="butSend_Click"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Получение файла" >
                 <Grid Background="#FFE5E5E5">
                     <Button x:Name="butSave" Content="Сохранить" HorizontalAlignment="Center" Margin="0,0,0,0" 
-                            VerticalAlignment="Center" Width="75" FontSize="12" Click="butSave_Click"/>
-
+                            VerticalAlignment="Center"  Height="30" Width="80" FontSize="12" Click="butSave_Click"/>
+                  
                 </Grid>
             </TabItem>
         </TabControl>
