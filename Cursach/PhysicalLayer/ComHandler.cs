@@ -1,15 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO.Ports;
 namespace Cursach.PhysicalLayer
 {
     public delegate void MessageFunc(string message);
+
     public class ComHandler
     {
         protected int fuckYall;
+
+        public byte[] Buffer { get; private set; }
+        public SerialPort ComPort { get; private set; }
+
         public static string[] GetSortedPortNames()
         {
             string[] portNames = SerialPort.GetPortNames();
@@ -17,20 +18,20 @@ namespace Cursach.PhysicalLayer
             return portNames;
         }
 
-        public SerialPort ComPort { get; private set; }
-        
-        public ComHandler(string _portName /*, string _baudRate, string _parity, string _dataBits, string _stopBits*/)
+        public void OpenCom(string portName, string baudRate, string parity, string dataBits, string stopBits, MessageFunc messageFunc)
         {
-            ComPort = new SerialPort(
-                portName: _portName /*, 
-                baudRate: int.Parse(_baudRate), 
-                parity: (Parity)Enum.Parse(typeof(Parity), _parity), 
-                dataBits: int.Parse(_dataBits), 
-                stopBits: (StopBits)Enum.Parse(typeof(StopBits), _stopBits)*/);
-        }
+            if (ComPort == null)
+            {
+                ComPort = new SerialPort();
+                ComPort.DataReceived += new SerialDataReceivedEventHandler(ComPort_DataReceived);
+            }
 
-        public void OpenCom(MessageFunc messageFunc)
-        {
+            ComPort.PortName = portName;
+            ComPort.BaudRate = int.Parse(baudRate);
+            ComPort.Parity = (Parity)Enum.Parse(typeof(Parity), parity);
+            ComPort.DataBits = int.Parse(dataBits);
+            ComPort.StopBits = (StopBits)Enum.Parse(typeof(StopBits), stopBits);
+
             try
             {
                 ComPort.Open();
@@ -40,10 +41,29 @@ namespace Cursach.PhysicalLayer
             {
                 messageFunc("Порт " + ComPort.PortName + " уже занят");
             }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                messageFunc("Параметры COM-порта заданы некорректно");
+            }
         }
-        public void CloseCom()
+
+        private void ComPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            int bytes = ComPort.BytesToRead;
+            Buffer = new byte[bytes];
+            ComPort.Read(Buffer, 0, bytes);
+
+        }
+
+        public void CloseCom(MessageFunc messageFunc)
         {
             ComPort.Close();
+            messageFunc("Порт " + ComPort.PortName + " успешно закрыт");
+        }
+
+        public void WriteToCom(byte[] buffer)
+        {
+            ComPort.Write(buffer, 0, buffer.Length);
         }
     }
 }
