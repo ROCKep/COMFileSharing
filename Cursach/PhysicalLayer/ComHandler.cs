@@ -27,9 +27,9 @@ namespace Cursach.PhysicalLayer
             }
 
             ComPort.PortName = portName;
-            ComPort.BaudRate = int.Parse(baudRate);
-            ComPort.Parity = (Parity)Enum.Parse(typeof(Parity), parity);
-            ComPort.DataBits = int.Parse(dataBits);
+            ComPort.BaudRate = int.Parse(baudRate.Trim());
+            ComPort.Parity = (Parity)Enum.Parse(typeof(Parity), parity.Trim());
+            ComPort.DataBits = int.Parse(dataBits.Trim());
             ComPort.StopBits = (StopBits)Enum.Parse(typeof(StopBits), stopBits);
 
             try

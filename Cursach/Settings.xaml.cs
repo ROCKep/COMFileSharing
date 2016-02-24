@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -19,18 +20,24 @@ namespace Cursach
     /// </summary>
     public partial class Settings : Window
     {
+        public PhysicalLayer.ComHandler ComManager { get; private set; }
         public Settings()
         {
+            ComManager = new PhysicalLayer.ComHandler();
             InitializeComponent();
+        }
+
+        public void ShowMessage(string msg)
+        {
+            System.Windows.MessageBox.Show(msg);
         }
 
         private void butBrowse_Click(object sender, RoutedEventArgs e)
         {
-            // Configure open file dialog box
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             dlg.FileName = "Document"; // Default file name
-            dlg.DefaultExt = ".txt"; // Default file extension
-            dlg.Filter = "Text documents (.txt)|*.txt"; // Filter files by extension
+            dlg.DefaultExt = String.Empty; // Default file extension
+            dlg.Filter = String.Empty; // Filter files by extension
 
             // Show open file dialog box
             Nullable<bool> result = dlg.ShowDialog();
@@ -46,7 +53,16 @@ namespace Cursach
 
         private void butOpenCom_Click(object sender, RoutedEventArgs e)
         {
-            // Configure the message box to be displayed
+            ComManager.OpenCom(cmbCOM.SelectedItem.ToString(), cmbBaud.SelectedItem,
+                 cmbParity.SelectedItem, cmbDataBits.SelectedItem,
+                 cmbStopBits.SelectedItem, ShowMessage);
+
+            if (ComManager.ComPort.IsOpen)
+            {
+                butOpenCom.IsEnabled = false;
+                butCloseCom.IsEnabled = true;
+            }
+            /*// Configure the message box to be displayed
             string messageBoxText = "Вы собираетесь открыть COM-порт?";
             string caption = "File Transer";
             MessageBoxButton button = MessageBoxButton.YesNo;
@@ -66,13 +82,20 @@ namespace Cursach
                     // User pressed No button
                     // ...
                     break;
-            }
+            }*/
 
         }
 
         private void butCloseCom_Click(object sender, RoutedEventArgs e)
         {
-            // Configure the message box to be displayed
+            ComManager.CloseCom(ShowMessage);
+            if (!ComManager.ComPort.IsOpen)
+            {
+                butCloseCom.IsEnabled = false;
+                butOpenCom.IsEnabled = true;
+            }
+
+            /*// Configure the message box to be displayed
             string messageBoxText = "Вы собираетесь закрыть COM-порт?";
             string caption = "File Transer";
             MessageBoxButton button = MessageBoxButton.YesNo;
@@ -92,7 +115,7 @@ namespace Cursach
                     // User pressed No button
                     // ...
                     break;
-            }
+            }*/
 
         }
 
@@ -103,20 +126,54 @@ namespace Cursach
 
         private void butSave_Click(object sender, RoutedEventArgs e)
         {
-            // Configure save file dialog box
-            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
-            dlg.FileName = "Document"; // Default file name
-            dlg.DefaultExt = ".text"; // Default file extension
-            dlg.Filter = "Text documents (.txt)|*.txt"; // Filter files by extension
+            // Configure open file dialog box
+            System.Windows.Forms.FolderBrowserDialog folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            folderBrowserDialog.Description = "Select the directory that you want to use as the default.";
 
-            // Show save file dialog box
-            Nullable<bool> result = dlg.ShowDialog();
+            folderBrowserDialog.RootFolder = Environment.SpecialFolder.Desktop;
+            folderBrowserDialog.ShowDialog();
+            tbName.Text = folderBrowserDialog.SelectedPath;
 
-            // Process save file dialog box results
-            if (result == true)
+            //// Configure save file dialog box
+            //Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+            //dlg.FileName = "Document"; // Default file name
+            //dlg.DefaultExt = ".text"; // Default file extension
+            //dlg.Filter = "Text documents (.txt)|*.txt"; // Filter files by extension
+
+            //// Show save file dialog box
+            //Nullable<bool> result = dlg.ShowDialog();
+
+            //// Process save file dialog box results
+            //if (result == true)
+            //{
+            //    // Save document
+            //    string filename = dlg.FileName;
+            //}
+        }
+
+        private void WinSettings_Loaded(object sender, RoutedEventArgs e)
+        {
+            string[] masCOM;
+            masCOM = PhysicalLayer.ComHandler.GetSortedPortNames();
+            cmbCOM.Items.Clear();
+            foreach (string port in masCOM)
             {
-                // Save document
-                string filename = dlg.FileName;
+                cmbCOM.Items.Add(port);
+                cmbCOM.SelectedItem = cmbCOM.Items[0];
+            }
+            if (masCOM.Length == 0)
+            {
+                // Configure the message box to be displayed
+                string messageBoxText = "COM-порты отсутствуют.\n Завершение программы.";
+                string caption = "File Transer";
+                MessageBoxButton button = MessageBoxButton.OK;
+                MessageBoxImage icon = MessageBoxImage.Warning;
+                this.Close();
+
+                // Display message box
+                MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+
+                
             }
         }
     }

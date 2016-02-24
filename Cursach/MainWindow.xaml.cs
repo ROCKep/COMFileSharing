@@ -31,5 +31,6 @@ namespace Cursach
             this.Close();
             w1.Show();
         }
+
     }
 }
