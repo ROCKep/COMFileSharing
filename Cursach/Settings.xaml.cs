@@ -29,7 +29,10 @@ namespace Cursach
 
         public void ShowMessage(string msg)
         {
-            System.Windows.MessageBox.Show(msg);
+            string caption = "File Transfer";
+            MessageBoxButton button = MessageBoxButton.OK;
+            MessageBoxImage icon = MessageBoxImage.Information;
+            System.Windows.MessageBox.Show(msg, caption, button, icon);
         }
 
         private void butBrowse_Click(object sender, RoutedEventArgs e)
@@ -53,15 +56,22 @@ namespace Cursach
 
         private void butOpenCom_Click(object sender, RoutedEventArgs e)
         {
-            ComManager.OpenCom(cmbCOM.SelectedItem.ToString(), cmbBaud.SelectedItem,
-                 cmbParity.SelectedItem, cmbDataBits.SelectedItem,
-                 cmbStopBits.SelectedItem, ShowMessage);
+            ComManager.OpenCom(cmbCOM.Text, cmbBaud.Text,
+                 cmbParity.Text, cmbDataBits.Text,
+                 cmbStopBits.Text, ShowMessage);
 
             if (ComManager.ComPort.IsOpen)
             {
                 butOpenCom.IsEnabled = false;
                 butCloseCom.IsEnabled = true;
             }
+
+            cmbCOM.IsEnabled = false;
+            cmbBaud.IsEnabled = false;
+            cmbDataBits.IsEnabled = false;
+            cmbStopBits.IsEnabled = false;
+            cmbParity.IsEnabled = false;
+
             /*// Configure the message box to be displayed
             string messageBoxText = "Вы собираетесь открыть COM-порт?";
             string caption = "File Transer";
@@ -94,6 +104,12 @@ namespace Cursach
                 butCloseCom.IsEnabled = false;
                 butOpenCom.IsEnabled = true;
             }
+
+            cmbCOM.IsEnabled = true;
+            cmbBaud.IsEnabled = true;
+            cmbDataBits.IsEnabled = true;
+            cmbStopBits.IsEnabled = true;
+            cmbParity.IsEnabled = true;
 
             /*// Configure the message box to be displayed
             string messageBoxText = "Вы собираетесь закрыть COM-порт?";
@@ -150,7 +166,7 @@ namespace Cursach
             //    string filename = dlg.FileName;
             //}
         }
-
+       
         private void WinSettings_Loaded(object sender, RoutedEventArgs e)
         {
             string[] masCOM;
@@ -161,19 +177,35 @@ namespace Cursach
                 cmbCOM.Items.Add(port);
                 cmbCOM.SelectedItem = cmbCOM.Items[0];
             }
+
             if (masCOM.Length == 0)
             {
                 // Configure the message box to be displayed
                 string messageBoxText = "COM-порты отсутствуют.\n Завершение программы.";
-                string caption = "File Transer";
+                string caption = "File Transfer";
                 MessageBoxButton button = MessageBoxButton.OK;
                 MessageBoxImage icon = MessageBoxImage.Warning;
                 this.Close();
 
                 // Display message box
-                MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
+                MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);  
+            }
 
-                
+            butCloseCom.IsEnabled = false;
+            butSend.IsEnabled = false;
+       
+            tbName.KeyDown += new KeyEventHandler(tb_KeyDown);
+        }
+
+        private void tb_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (tbName.Text != "")
+            {
+                butSend.IsEnabled = true;
+            }
+            else
+            {
+                butSend.IsEnabled = false;
             }
         }
     }

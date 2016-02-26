@@ -9,13 +9,13 @@
     <Grid>
         <TabControl x:Name="tabControl" HorizontalAlignment="Left" Height="322" VerticalAlignment="Top" Width="344" FontSize="12">
             <TabItem Header="Главная">
-                <Grid Background="#FFE5E5E5">
+                <Grid Background="white">
                     <Button x:Name="butBegin" Content="Настройки" HorizontalAlignment="Center" 
-                            Margin="10,10,10,10" VerticalAlignment="Center" Height="30" Width="75" FontSize="12" Click="butBegin_Click"/>
+                            Margin="10,10,10,10" VerticalAlignment="Center" Height="26" Width="75" FontSize="12" Click="butBegin_Click"/>
                 </Grid>
             </TabItem>
             <TabItem Header="О Программе">
-                <Grid Background="#FFE5E5E5">
+                <Grid Background="White">
                     <RichTextBox x:Name="richTextBox1" HorizontalAlignment="Center" Height="290" 
                                  VerticalAlignment="Top" Width="334" IsEnabled="False" IsReadOnly="True" FontSize="12">
                         <FlowDocument>
@@ -27,7 +27,7 @@
                 </Grid>
             </TabItem>
             <TabItem Header="Информация">
-                <Grid Background="#FFE5E5E5">
+                <Grid Background="White">
                     <RichTextBox x:Name="richTextBox2" HorizontalAlignment="Center" Height="290" 
                                  VerticalAlignment="Top" Width="334" IsEnabled="False" IsReadOnly="True" FontSize="12">
                         <FlowDocument>

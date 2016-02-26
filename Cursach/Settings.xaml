@@ -10,13 +10,13 @@
         <TabControl x:Name="tabControl" HorizontalAlignment="Left" Height="322" VerticalAlignment="Top" Width="519" FontSize="12">
             <TabItem Header="Настройка COM-порта" IsSelected="True">
                 <Grid Background="white">
-                    <Label Content="COM-порт" HorizontalAlignment="Left" Margin="75,20,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.938,2.304" Width="120" Height="30" Cursor="None" FontSize="12"/>
-                    <Label Content="Скорость (бит/сек)" HorizontalAlignment="Left" Margin="75,60,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.938,2.304" Width="120" Height="30" Cursor="None" FontSize="12"/>
-                    <Label Content="Биты данных" HorizontalAlignment="Left" Margin="75,100,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.938,2.304" Width="120" Height="30" Cursor="None" FontSize="12"/>
-                    <Label Content="Стоп бит" HorizontalAlignment="Left" Margin="75,140,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.938,2.304" Width="120" Height="30" Cursor="None" FontSize="12"/>
-                    <Label Content="Чётность" HorizontalAlignment="Left" Margin="75,180,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.938,2.304" Width="120" Height="30" Cursor="None" FontSize="12"/>
+                    <Label Content="COM-порт" HorizontalAlignment="Left" Margin="75,20,0,0" VerticalAlignment="Top" Width="120" Height="30" FontSize="12"/>
+                    <Label Content="Скорость (бит/сек)" HorizontalAlignment="Left" Margin="75,60,0,0" VerticalAlignment="Top" Width="120" Height="30" FontSize="12"/>
+                    <Label Content="Биты данных" HorizontalAlignment="Left" Margin="75,100,0,0" VerticalAlignment="Top" Width="120" Height="30" FontSize="12"/>
+                    <Label Content="Стоп бит" HorizontalAlignment="Left" Margin="75,140,0,0" VerticalAlignment="Top" Width="120" Height="30" FontSize="12"/>
+                    <Label Content="Чётность" HorizontalAlignment="Left" Margin="75,180,0,0" VerticalAlignment="Top" Width="120" Height="30" FontSize="12"/>
                     <ComboBox x:Name="cmbCOM" HorizontalAlignment="Left" Height="25" Margin="225,20,0,0" VerticalAlignment="Top" Width="200" FontSize="12" IsEditable="True" IsReadOnly="True"/>
-                    <ComboBox x:Name="cmbBaud" HorizontalAlignment="Left" Height="25" Margin="225,60,0,0" VerticalAlignment="Top" Width="200" FontSize="12" IsEditable="True" IsReadOnly="True">
+                    <ComboBox x:Name="cmbBaud" HorizontalAlignment="Left" Height="25" Margin="225,60,0,0" VerticalAlignment="Top" Width="200" FontSize="12" IsReadOnly="True" IsEditable="True">
                         <ComboBoxItem Content="75"/>
                         <ComboBoxItem Content="110"/>
                         <ComboBoxItem Content="134"/>
@@ -43,8 +43,7 @@
                         <ComboBoxItem Content="8" IsSelected="True"/>
                     </ComboBox>
                     <ComboBox x:Name="cmbStopBits" HorizontalAlignment="Left" Height="25" Margin="225,140,0,0" VerticalAlignment="Top" Width="200" FontSize="12" IsEditable="True" IsReadOnly="True">
-                        <ComboBoxItem Content="None" ToolTip="0" IsSelected="True"/>
-                        <ComboBoxItem Content="One" ToolTip="1" />
+                        <ComboBoxItem Content="One" ToolTip="1" IsSelected="True"/>
                         <ComboBoxItem Content="Two" ToolTip="2" />
                         <ComboBoxItem Content="OnePointFive" ToolTip="1,5" />
                     </ComboBox>
@@ -55,23 +54,23 @@
                         <ComboBoxItem Content="Mark" ToolTip="Оставляет бит чётности равным 1"/>
                         <ComboBoxItem Content="Space" ToolTip="Оставляет бит чётности равным 0"/>
                     </ComboBox>
-                    <Button x:Name="butOpenCom" Content="Открыть COM-порт" HorizontalAlignment="Center" Margin="0,240,150,0" VerticalAlignment="Top"  Height="30" Width="130" Click="butOpenCom_Click"/>
-                    <Button x:Name="butCloseCom" Content="Закрыть COM-порт" HorizontalAlignment="Center" Margin="150,240,0,0" VerticalAlignment="Top"  Height="30" Width="130" Click="butCloseCom_Click"/>
+                    <Button x:Name="butOpenCom" Content="Открыть COM-порт" HorizontalAlignment="Center" Margin="0,240,150,0" VerticalAlignment="Top"  Height="26" Width="130" Click="butOpenCom_Click"/>
+                    <Button x:Name="butCloseCom" Content="Закрыть COM-порт" HorizontalAlignment="Center" Margin="150,240,0,0" VerticalAlignment="Top"  Height="26" Width="130" Click="butCloseCom_Click"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Передача файла">
                 <Grid Background="White">
                     <Label Content="Имя файла:" HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top" FontSize="12"/>
-                    <TextBox x:Name="tbName" HorizontalAlignment="Left" Height="30" Margin="15,75,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="400" FontSize="12"/>
-                    <Button x:Name="butBrowse" Content="Поиск" HorizontalAlignment="Left" Margin="420,74,0,0" VerticalAlignment="Top" Height="30" Width="80" FontSize="12" Click="butBrowse_Click"/>
-                    <Button x:Name="butSend" Content="Отправить" HorizontalAlignment="Center" Margin="0,110,0,0" VerticalAlignment="Top" Height="30" Width="80" FontSize="12" Click="butSend_Click"/>
+                    <TextBox x:Name="tbName" HorizontalAlignment="Left" Height="26" Margin="15,75,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="400" FontSize="12"/>
+                    <Button x:Name="butBrowse" Content="Поиск" HorizontalAlignment="Left" Margin="420,74,0,0" VerticalAlignment="Top" Height="26" Width="80" FontSize="12" Click="butBrowse_Click"/>
+                    <Button x:Name="butSend" Content="Отправить" HorizontalAlignment="Center" Margin="0,110,0,0" VerticalAlignment="Top" Height="26" Width="80" FontSize="12" Click="butSend_Click"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Получение файла" >
                 <!--<Grid Background="#FFE5E5E5">-->
                 <Grid Background="White">
                     <Button x:Name="butSave" Content="Сохранить" HorizontalAlignment="Center" Margin="0,0,0,0" 
-                            VerticalAlignment="Center"  Height="30" Width="80" FontSize="12" Click="butSave_Click"/>
+                            VerticalAlignment="Center"  Height="26" Width="80" FontSize="12" Click="butSave_Click"/>
 
                 </Grid>
             </TabItem>
