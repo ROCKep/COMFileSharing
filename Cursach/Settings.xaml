@@ -61,7 +61,7 @@
             <TabItem Header="Передача файла">
                 <Grid Background="White">
                     <Label Content="Имя файла:" HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top" FontSize="12"/>
-                    <TextBox x:Name="tbName" HorizontalAlignment="Left" Height="26" Margin="15,75,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="400" FontSize="12"/>
+                    <TextBox x:Name="tbName" HorizontalAlignment="Left" Height="26" Margin="15,75,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="400" FontSize="12" TextChanged="tbName_TextChanged"/>
                     <Button x:Name="butBrowse" Content="Поиск" HorizontalAlignment="Left" Margin="420,74,0,0" VerticalAlignment="Top" Height="26" Width="80" FontSize="12" Click="butBrowse_Click"/>
                     <Button x:Name="butSend" Content="Отправить" HorizontalAlignment="Center" Margin="0,110,0,0" VerticalAlignment="Top" Height="26" Width="80" FontSize="12" Click="butSend_Click"/>
                 </Grid>

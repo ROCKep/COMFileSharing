@@ -166,7 +166,7 @@ namespace Cursach
             //    string filename = dlg.FileName;
             //}
         }
-       
+
         private void WinSettings_Loaded(object sender, RoutedEventArgs e)
         {
             string[] masCOM;
@@ -188,18 +188,16 @@ namespace Cursach
                 this.Close();
 
                 // Display message box
-                MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);  
+                MessageBoxResult result = MessageBox.Show(messageBoxText, caption, button, icon);
             }
 
             butCloseCom.IsEnabled = false;
             butSend.IsEnabled = false;
-       
-            tbName.KeyDown += new KeyEventHandler(tb_KeyDown);
         }
-
-        private void tb_KeyDown(object sender, KeyEventArgs e)
+      
+        private void tbName_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (tbName.Text != "")
+            if (tbName.Text != String.Empty)
             {
                 butSend.IsEnabled = true;
             }
