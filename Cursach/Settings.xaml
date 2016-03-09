@@ -69,8 +69,10 @@
             <TabItem Header="Получение файла" >
                 <!--<Grid Background="#FFE5E5E5">-->
                 <Grid Background="White">
-                    <Button x:Name="butSave" Content="Сохранить" HorizontalAlignment="Center" Margin="0,0,0,0" 
-                            VerticalAlignment="Center"  Height="26" Width="80" FontSize="12" Click="butSave_Click"/>
+                    <Label Content="Имя файла:" HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top" FontSize="12"/>
+                    <TextBox x:Name="tbDist" HorizontalAlignment="Left" Height="26" Margin="15,75,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="400" FontSize="12" TextChanged="tbDist_TextChanged"/>
+                    <Button x:Name="butChoose" Content="Выбрать" HorizontalAlignment="Left" Margin="420,74,0,0" VerticalAlignment="Top" Height="26" Width="80" FontSize="12" Click="butChoose_Click"/>
+                    <Button x:Name="butSave" Content="Сохранить" HorizontalAlignment="Center" Margin="0,110,0,0" VerticalAlignment="Top" Height="26" Width="80" FontSize="12" Click="butSave_Click"/>
 
                 </Grid>
             </TabItem>

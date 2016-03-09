@@ -7,7 +7,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
-
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -56,21 +55,20 @@ namespace Cursach
 
         private void butOpenCom_Click(object sender, RoutedEventArgs e)
         {
-            ComManager.OpenCom(cmbCOM.Text, cmbBaud.Text,
-                 cmbParity.Text, cmbDataBits.Text,
-                 cmbStopBits.Text, ShowMessage);
+            //ComManager.OpenCom(cmbCOM.Text, cmbBaud.Text,
+            //     cmbParity.Text, cmbDataBits.Text,
+            //     cmbStopBits.Text, ShowMessage);
 
-            if (ComManager.ComPort.IsOpen)
-            {
-                butOpenCom.IsEnabled = false;
-                butCloseCom.IsEnabled = true;
-            }
-
-            cmbCOM.IsEnabled = false;
-            cmbBaud.IsEnabled = false;
-            cmbDataBits.IsEnabled = false;
-            cmbStopBits.IsEnabled = false;
-            cmbParity.IsEnabled = false;
+            //if (ComManager.ComPort.IsOpen)
+            //{
+            //    butOpenCom.IsEnabled = false;
+            //    butCloseCom.IsEnabled = true;
+            //    cmbCOM.IsEnabled = false;
+            //    cmbBaud.IsEnabled = false;
+            //    cmbDataBits.IsEnabled = false;
+            //    cmbStopBits.IsEnabled = false;
+            //    cmbParity.IsEnabled = false;
+            //}
 
             /*// Configure the message box to be displayed
             string messageBoxText = "Вы собираетесь открыть COM-порт?";
@@ -98,18 +96,17 @@ namespace Cursach
 
         private void butCloseCom_Click(object sender, RoutedEventArgs e)
         {
-            ComManager.CloseCom(ShowMessage);
-            if (!ComManager.ComPort.IsOpen)
-            {
-                butCloseCom.IsEnabled = false;
-                butOpenCom.IsEnabled = true;
-            }
-
-            cmbCOM.IsEnabled = true;
-            cmbBaud.IsEnabled = true;
-            cmbDataBits.IsEnabled = true;
-            cmbStopBits.IsEnabled = true;
-            cmbParity.IsEnabled = true;
+            //ComManager.CloseCom(ShowMessage);
+            //if (!ComManager.ComPort.IsOpen)
+            //{
+            //    butCloseCom.IsEnabled = false;
+            //    butOpenCom.IsEnabled = true;
+            //    cmbCOM.IsEnabled = true;
+            //    cmbBaud.IsEnabled = true;
+            //    cmbDataBits.IsEnabled = true;
+            //    cmbStopBits.IsEnabled = true;
+            //    cmbParity.IsEnabled = true;
+            //}
 
             /*// Configure the message box to be displayed
             string messageBoxText = "Вы собираетесь закрыть COM-порт?";
@@ -140,7 +137,7 @@ namespace Cursach
 
         }
 
-        private void butSave_Click(object sender, RoutedEventArgs e)
+        private void butChoose_Click(object sender, RoutedEventArgs e)
         {
             // Configure open file dialog box
             System.Windows.Forms.FolderBrowserDialog folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
@@ -148,7 +145,7 @@ namespace Cursach
 
             folderBrowserDialog.RootFolder = Environment.SpecialFolder.Desktop;
             folderBrowserDialog.ShowDialog();
-            tbName.Text = folderBrowserDialog.SelectedPath;
+            tbDist.Text = folderBrowserDialog.SelectedPath;
 
             //// Configure save file dialog box
             //Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
@@ -165,6 +162,11 @@ namespace Cursach
             //    // Save document
             //    string filename = dlg.FileName;
             //}
+        }
+
+        private void butSave_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
         private void WinSettings_Loaded(object sender, RoutedEventArgs e)
@@ -193,6 +195,7 @@ namespace Cursach
 
             butCloseCom.IsEnabled = false;
             butSend.IsEnabled = false;
+            butSave.IsEnabled = false;
         }
       
         private void tbName_TextChanged(object sender, TextChangedEventArgs e)
@@ -204,6 +207,18 @@ namespace Cursach
             else
             {
                 butSend.IsEnabled = false;
+            }
+        }
+
+        private void tbDist_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (tbDist.Text != String.Empty)
+            {
+                butSave.IsEnabled = true;
+            }
+            else
+            {
+                butSave.IsEnabled = false;
             }
         }
     }
