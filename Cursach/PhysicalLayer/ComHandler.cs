@@ -78,8 +78,6 @@ namespace Cursach.PhysicalLayer
             }           
         }
 
-
-
         /// <summary>
         /// Метод, открывающий порт с заданными параметрами
         /// </summary>
