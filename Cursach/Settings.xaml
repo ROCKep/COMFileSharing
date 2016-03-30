@@ -54,8 +54,9 @@
                         <ComboBoxItem Content="Mark" ToolTip="Оставляет бит чётности равным 1"/>
                         <ComboBoxItem Content="Space" ToolTip="Оставляет бит чётности равным 0"/>
                     </ComboBox>
-                    <Button x:Name="butOpenCom" Content="Открыть COM-порт" HorizontalAlignment="Center" Margin="0,240,150,0" VerticalAlignment="Top"  Height="26" Width="130" Click="butOpenCom_Click"/>
-                    <Button x:Name="butCloseCom" Content="Закрыть COM-порт" HorizontalAlignment="Center" Margin="150,240,0,0" VerticalAlignment="Top"  Height="26" Width="130" Click="butCloseCom_Click"/>
+                    <Button x:Name="butOpenCom" Content="Открыть COM-порт" HorizontalAlignment="Center" Margin="24,240,359,0" VerticalAlignment="Top"  Height="26" Width="130" Click="butOpenCom_Click"/>
+                    <Button x:Name="butCloseCom" Content="Закрыть COM-порт" HorizontalAlignment="Center" Margin="178,240,205,0" VerticalAlignment="Top"  Height="26" Width="130" Click="butCloseCom_Click"/>
+                    <Button x:Name="butOK" Content="OK" HorizontalAlignment="Center" Margin="354,240,29,0" VerticalAlignment="Top"  Height="26" Width="130" Click="butOK_Click"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Передача файла">

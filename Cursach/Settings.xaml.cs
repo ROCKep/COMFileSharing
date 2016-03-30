@@ -132,6 +132,14 @@ namespace Cursach
 
         }
 
+        private void butOK_Click(object sender, RoutedEventArgs e)
+        {
+            PhysicalLayer.PortState portstate = ComManager.SetupCom(
+                    cmbCOM.Text, cmbBaud.Text,
+                    cmbParity.Text, cmbDataBits.Text,
+                    cmbStopBits.Text);
+        }
+
         private void butSend_Click(object sender, RoutedEventArgs e)
         {
 
@@ -196,6 +204,9 @@ namespace Cursach
             butCloseCom.IsEnabled = false;
             butSend.IsEnabled = false;
             butSave.IsEnabled = false;
+            butCloseCom.Visibility = Visibility.Hidden;
+            butOpenCom.Visibility = Visibility.Hidden;
+
         }
       
         private void tbName_TextChanged(object sender, TextChangedEventArgs e)
