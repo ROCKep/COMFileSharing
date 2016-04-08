@@ -4,7 +4,7 @@ using System.IO;
 
 namespace Cursach.CanalLayer
 {
-    abstract class abFile
+    public abstract class abFile
     {
         protected byte startByte = 66;
         protected byte endByte = 56;
@@ -13,6 +13,16 @@ namespace Cursach.CanalLayer
 
         protected string path;
         protected int sendBlockSize = 8;
+
+        public string getPath()
+        {
+            return this.path;
+        }
+
+        public void setPath(string s)
+        {
+            this.path = s;
+        }
 
         protected byte invert(byte b)
         {
@@ -82,14 +92,13 @@ namespace Cursach.CanalLayer
         }
     }
 
-    class SFile : abFile
+    public class SFile : abFile
     {
-        public RFile rfile;
+        public PhysicalLayer.ComHandler comHandler;
 
-        public SFile(string path, RFile r)
+        public SFile(PhysicalLayer.ComHandler comHandler)
         {
-            this.path = path;
-            this.rfile = r;
+            this.comHandler = comHandler;
         }
 
         private byte[] Ham(byte[] b)
@@ -197,8 +206,8 @@ namespace Cursach.CanalLayer
                 */
 
                 //result - готовый для отправки блок
-                Console.WriteLine(result);
-                this.rfile.ReceiveNewBlock(result);
+                //Console.WriteLine(result);
+                this.comHandler.WriteToCom(result);
             }
         }
 
@@ -215,12 +224,11 @@ namespace Cursach.CanalLayer
         }
     }
 
-    class RFile : abFile
+    public class RFile : abFile
     {
         private SFile sfile;
-        public RFile(string path)
+        public RFile()
         {
-            this.path = path;
         }
 
         public void acquireSFile(SFile s)
@@ -340,7 +348,6 @@ namespace Cursach.CanalLayer
                 ReceiveSignal(b);
             if (b.Length > 1)
                 ReceiveBlock(b);
-
         }
 
     }
