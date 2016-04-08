@@ -21,10 +21,8 @@ namespace Cursach
     {
         public PhysicalLayer.ComHandler ComManager { get; private set; }
         public CanalLayer.SFile SendFile { get; private set;  }
-        public CanalLayer.RFile ReceiveFile { get; private set; }
         public Settings()
         { 
-            ReceiveFile = new CanalLayer.RFile();
             ComManager = new PhysicalLayer.ComHandler(ReceiveFile);
             SendFile = new CanalLayer.SFile(ComManager);
             InitializeComponent();
@@ -155,7 +153,7 @@ namespace Cursach
 
         private void butSend_Click(object sender, RoutedEventArgs e)
         {
-            this.SendFile.setPath(tbName.Text);
+            this.SendFile.setSendPath(tbName.Text);
             this.SendFile.SendFile();
         }
 
@@ -188,7 +186,7 @@ namespace Cursach
 
         private void butSave_Click(object sender, RoutedEventArgs e)
         {
-            this.ReceiveFile.setPath(tbDist.Text);
+            this.SendFile.setReceivePath(tbDist.Text);
         }
 
         private void WinSettings_Loaded(object sender, RoutedEventArgs e)

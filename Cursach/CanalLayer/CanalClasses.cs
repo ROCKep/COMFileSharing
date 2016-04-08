@@ -4,24 +4,44 @@ using System.IO;
 
 namespace Cursach.CanalLayer
 {
-    public abstract class abFile
+
+    public class SFile
     {
         protected byte startByte = 66;
         protected byte endByte = 56;
         protected byte trueRecByte = 36;
         protected byte falseRecByte = 24;
 
-        protected string path;
+        protected string sendPath;
+        protected string receivePath;
         protected int sendBlockSize = 8;
 
-        public string getPath()
+
+        public PhysicalLayer.ComHandler comHandler;
+
+        public SFile(PhysicalLayer.ComHandler comHandler)
         {
-            return this.path;
+            this.comHandler = comHandler;
         }
 
-        public void setPath(string s)
+        public string getSendPath()
         {
-            this.path = s;
+            return this.sendPath;
+        }
+
+        public void setSendPath(string s)
+        {
+            this.sendPath = s;
+        }
+
+        public string getReceiveFile()
+        {
+            return this.receivePath;
+        }
+
+        public void setReceivePath(string s)
+        {
+            this.receivePath = s;
         }
 
         protected byte invert(byte b)
@@ -83,23 +103,16 @@ namespace Cursach.CanalLayer
 
         protected void SendSignal(byte b)
         {
-
+            byte[] send = new byte[1];
+            send[0] = b;
+            this.comHandler.WriteToCom(send);
         }
 
         protected void ReceiveSignal(byte[] b)
         {
 
         }
-    }
 
-    public class SFile : abFile
-    {
-        public PhysicalLayer.ComHandler comHandler;
-
-        public SFile(PhysicalLayer.ComHandler comHandler)
-        {
-            this.comHandler = comHandler;
-        }
 
         private byte[] Ham(byte[] b)
         {
@@ -129,7 +142,7 @@ namespace Cursach.CanalLayer
             byte[] nul = { 0, 0, 0, 0, 0, 0, 0, 0 };
             byte[] rez = new byte[2 * this.sendBlockSize];
             byte[] ReadArray;
-            FileStream fstream = File.OpenRead(this.path);
+            FileStream fstream = File.OpenRead(this.sendPath);
             long fileLength = fstream.Length;
             long readSize = 4;
             for (long i = 0; i < fileLength; i += readSize)
@@ -209,6 +222,7 @@ namespace Cursach.CanalLayer
                 //Console.WriteLine(result);
                 this.comHandler.WriteToCom(result);
             }
+            fstream.Close();
         }
 
         public void SendBlock(byte[] sendByte, byte[] recByte)
@@ -221,19 +235,6 @@ namespace Cursach.CanalLayer
             }
             return rez;
             */
-        }
-    }
-
-    public class RFile : abFile
-    {
-        private SFile sfile;
-        public RFile()
-        {
-        }
-
-        public void acquireSFile(SFile s)
-        {
-            this.sfile = s;
         }
 
         private bool HamCheck(byte[] b)
@@ -323,12 +324,11 @@ namespace Cursach.CanalLayer
                     rez[i] = tobyte(FullBytes[i]);
                 }
 
-                FileStream fstream = new FileStream(this.path, FileMode.OpenOrCreate);
+                FileStream fstream = new FileStream(this.receivePath, FileMode.OpenOrCreate);
 
                 // запись массива байтов в файл
                 fstream.Seek(0, SeekOrigin.End);
                 fstream.Write(rez, 0, rez.Length);
-                //this.writePosition += length/2;
                 Console.WriteLine("Блок записан!");
                 fstream.Close();
 
@@ -349,6 +349,5 @@ namespace Cursach.CanalLayer
             if (b.Length > 1)
                 ReceiveBlock(b);
         }
-
-    }
+    }    
 }

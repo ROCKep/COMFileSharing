@@ -21,14 +21,14 @@ namespace Cursach.PhysicalLayer
         public byte[] WriteBuffer { get; private set; }
         public SerialPort ComPort { get; private set; }
 
-        public CanalLayer.RFile rFile;
+        public CanalLayer.SFile sFile;
 
-        public ComHandler(CanalLayer.RFile rFile)
+        public ComHandler(CanalLayer.SFile sFile)
         {
             ComPort = new SerialPort();
             ComPort.DataReceived += new SerialDataReceivedEventHandler(ComPort_DataReceived);
             ComPort.PinChanged += new SerialPinChangedEventHandler(ComPort_PinChanged);
-            this.rFile = rFile;
+            this.sFile = sFile;
         }
 
         /// <summary>
