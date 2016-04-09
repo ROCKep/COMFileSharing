@@ -13,8 +13,9 @@ namespace Cursach.CanalLayer
 
         protected string sendPath;
         protected string receivePath;
-        protected int sendBlockSize = 8;
-
+        protected int sendBlockSize = 8; //количество байт для отправки и приема
+        protected bool ReceivedRight = false; //переменная для проверки правильности отправки
+        public bool isReceived = false;
 
         public PhysicalLayer.ComHandler comHandler;
 
@@ -114,7 +115,11 @@ namespace Cursach.CanalLayer
                 this.SendSignal(this.startByte);
             if (temp == this.endByte)
                 this.SendSignal(this.endByte);
+            if (temp == this.trueRecByte)
+                this.ReceivedRight = true;
         }
+
+        //отправка
 
         private byte[] Ham(byte[] b)
         {
@@ -135,6 +140,7 @@ namespace Cursach.CanalLayer
 
         public void SendFile()
         {
+            ReceivedRight = false;
             byte[][] FullByteArray;
             byte[][] HalfByteArray;
             byte[][] CodeByteArray;
@@ -151,25 +157,20 @@ namespace Cursach.CanalLayer
             {
                 if ((fileLength - i) < 4)
                     readSize = fileLength - i;
-                ReadArray = new byte[readSize];
-                fstream.Read(ReadArray, 0, ReadArray.Length);
-
-                FullByteArray = new byte[readSize][];
-                HalfByteArray = new byte[readSize * 2][];
-                CodeByteArray = new byte[2 * readSize][];
-                mid = new byte[2 * readSize][];
-                result = new byte[2 * readSize];
-
+                ReadArray = new byte[readSize]; //массив для считывания куска файла
+                fstream.Read(ReadArray, 0, ReadArray.Length); 
+                FullByteArray = new byte[readSize][]; //массив для записи считанных байтов в псевдодвоичном виде (ПДД)
+                HalfByteArray = new byte[readSize * 2][]; //массив для записи байтов в ПДД, разделенных на половинки
+                CodeByteArray = new byte[2 * readSize][]; //массив для записи байтов в ПДД, закодированных кодом хэмминга
+                mid = new byte[2 * readSize][]; //массив для хранения промежуточных данных
+                result = new byte[2 * readSize]; //массив для хранения байтов, готовых для отправки
                 for (int a = 0; a < readSize; a++)
                 {
                     FullByteArray[a] = toarr(ReadArray[a]);
                 }
-
                 //делим на блоки по 4 байта
-
                 int b = 0;
                 int add = 0;
-
                 for (int a = 0; a < readSize; a++)
                 {
                     for (int x = 0; x < 4; x++)
@@ -187,21 +188,17 @@ namespace Cursach.CanalLayer
                     add = 0;
                     b++;
                 }
-
                 //кодируем кодом Хэмминга
-
                 for (int a = 0; a < 2 * readSize; a++)
                 {
                     CodeByteArray[a] = Ham(HalfByteArray[a]);
                 }
-
                 //преобразуем в байты для передачи
-
+                //суть преобразования - из массивов по 7 знаков (7битных чисел) сделать массивы по 8 знаков, дописав ноль в начале
                 for (int a = 0; a < 2 * readSize; a++)
                 {
                     mid[a] = ret(nul, 8);
                 }
-
                 for (int a = 0; a < 2 * readSize; a++)
                 {
                     for (int c = 0; c < 7; c++)
@@ -213,31 +210,25 @@ namespace Cursach.CanalLayer
                 {
                     result[a] = tobyte(mid[a]);
                 }
-                /*
-                for (int a = 0; a < 2 * readSize; a++)
-                {
-                    Console.WriteLine(result[a]);
-                }
-                */
-
                 //result - готовый для отправки блок
-                //Console.WriteLine(result);
                 this.comHandler.WriteToCom(result);
+                while(!isReceived)
+                {
+
+                }
+                if (!this.ReceivedRight)
+                    i += readSize;
             }
             fstream.Close();
         }
 
-        public void SendBlock(byte[] sendByte, byte[] recByte)
+        public void SendBlock(byte[] result)
         {
-            /*
-            byte[] rez = new byte[size];
-            for(int i = start; i < (start + size); i++)
-            {
-                rez[i] = this.convertedBytes[i];
-            }
-            return rez;
-            */
+            this.comHandler.WriteToCom(result);
+            //return this.ReceiveSignal();
         }
+
+        //прием
 
         private bool HamCheck(byte[] b)
         {
