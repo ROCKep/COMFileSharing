@@ -104,7 +104,7 @@ namespace Cursach.PhysicalLayer
             int bytes = ComPort.BytesToRead;
             ReadBuffer = new byte[bytes];
             ComPort.Read(ReadBuffer, 0, bytes);
-            this.rFile.ReceiveNewBlock(ReadBuffer);
+            this.sFile.ReceiveNewBlock(ReadBuffer);
         }
    
         public void WriteToCom(byte[] buffer)

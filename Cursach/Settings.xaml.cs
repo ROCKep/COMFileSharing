@@ -23,7 +23,7 @@ namespace Cursach
         public CanalLayer.SFile SendFile { get; private set;  }
         public Settings()
         { 
-            ComManager = new PhysicalLayer.ComHandler(ReceiveFile);
+            ComManager = new PhysicalLayer.ComHandler(SendFile);
             SendFile = new CanalLayer.SFile(ComManager);
             InitializeComponent();
         }

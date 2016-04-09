@@ -10,7 +10,6 @@ namespace Cursach.CanalLayer
         protected byte startByte = 66;
         protected byte endByte = 56;
         protected byte trueRecByte = 36;
-        protected byte falseRecByte = 24;
 
         protected string sendPath;
         protected string receivePath;
@@ -110,9 +109,12 @@ namespace Cursach.CanalLayer
 
         protected void ReceiveSignal(byte[] b)
         {
-
+            byte temp = b[0];
+            if (temp == this.startByte)
+                this.SendSignal(this.startByte);
+            if (temp == this.endByte)
+                this.SendSignal(this.endByte);
         }
-
 
         private byte[] Ham(byte[] b)
         {
