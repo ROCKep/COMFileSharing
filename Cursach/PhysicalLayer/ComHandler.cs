@@ -19,11 +19,14 @@ namespace Cursach.PhysicalLayer
         public byte[] WriteBuffer { get; private set; }
         public SerialPort ComPort { get; private set; }
 
-        public ComHandler()
+        public CanalLayer.SFile sFile;
+
+        public ComHandler(CanalLayer.SFile sFile)
         {
             ComPort = new SerialPort();
             ComPort.DataReceived += new SerialDataReceivedEventHandler(ComPort_DataReceived);
             ComPort.PinChanged += new SerialPinChangedEventHandler(ComPort_PinChanged);
+            this.sFile = sFile;
         }
 
         /// <summary>
@@ -75,57 +78,6 @@ namespace Cursach.PhysicalLayer
         }
 
         /// <summary>
-        /// Метод, открывающий порт с заданными параметрами
-        /// </summary>
-        public PortState OpenCom(string portName, string baudRate, string parity, string dataBits, string stopBits /*, MessageFunc messageFunc*/)
-        {
-            if (ComPort == null)
-            {
-                ComPort = new SerialPort();
-                ComPort.DataReceived += new SerialDataReceivedEventHandler(ComPort_DataReceived);
-                ComPort.PinChanged += new SerialPinChangedEventHandler(ComPort_PinChanged);
-            }
-            ComPort.PortName = portName;
-            ComPort.BaudRate = int.Parse(baudRate.Trim());
-            ComPort.Parity = (Parity)Enum.Parse(typeof(Parity), parity.Trim());
-            ComPort.DataBits = int.Parse(dataBits.Trim());
-            ComPort.StopBits = (StopBits)Enum.Parse(typeof(StopBits), stopBits);
-            try
-            {
-                ComPort.Open();
-                return PortState.Opened;
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return PortState.Occupied;
-            }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                return PortState.InvalidArgs;
-            }
-            catch (Exception ex)
-            {
-                return PortState.Error;
-            }
-        }
-
-        /// <summary>
-        /// Метод, закрывающий порт
-        /// </summary>
-        public PortState CloseCom(/*MessageFunc messageFunc*/)
-        {
-            try
-            {
-                ComPort.Close();
-                return PortState.Closed;
-            }
-            catch (Exception ex)
-            {
-                return PortState.Error;
-            }
-        }
-
-        /// <summary>
         /// Обработчик события, возникающего при обрыве соединения
         /// </summary>
         private void ComPort_PinChanged(object sender, SerialPinChangedEventArgs e)
@@ -148,8 +100,10 @@ namespace Cursach.PhysicalLayer
             int bytes = ComPort.BytesToRead;
             ReadBuffer = new byte[bytes];
             ComPort.Read(ReadBuffer, 0, bytes);
+            this.sFile.ReceiveNewBlock(ReadBuffer);
+            this.sFile.isReceived = true;
         }
-        
+   
         public void WriteToCom(byte[] buffer)
         {
             ComPort.Write(buffer, 0, buffer.Length);

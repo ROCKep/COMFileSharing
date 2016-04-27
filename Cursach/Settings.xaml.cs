@@ -20,9 +20,11 @@ namespace Cursach
     public partial class Settings : Window
     {
         public PhysicalLayer.ComHandler ComManager { get; private set; }
+        public CanalLayer.SFile SendFile { get; private set;  }
         public Settings()
-        {
-            ComManager = new PhysicalLayer.ComHandler();
+        { 
+            ComManager = new PhysicalLayer.ComHandler(SendFile);
+            SendFile = new CanalLayer.SFile(ComManager);
             InitializeComponent();
         }
 
@@ -138,11 +140,21 @@ namespace Cursach
                     cmbCOM.Text, cmbBaud.Text,
                     cmbParity.Text, cmbDataBits.Text,
                     cmbStopBits.Text);
+
+            if (portstate == PhysicalLayer.PortState.Opened)
+            {
+                MessageBox.Show("Порт успешно настроен бич");
+            }
+            else
+            {
+                MessageBox.Show("Какая то ошибка мне похуй");
+            }
         }
 
         private void butSend_Click(object sender, RoutedEventArgs e)
         {
-
+            this.SendFile.setSendPath(tbName.Text);
+            this.SendFile.SendFile();
         }
 
         private void butChoose_Click(object sender, RoutedEventArgs e)
@@ -174,7 +186,7 @@ namespace Cursach
 
         private void butSave_Click(object sender, RoutedEventArgs e)
         {
-
+            this.SendFile.setReceivePath(tbDist.Text);
         }
 
         private void WinSettings_Loaded(object sender, RoutedEventArgs e)

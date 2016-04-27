@@ -4,20 +4,47 @@ using System.IO;
 
 namespace Cursach.CanalLayer
 {
-    class SFile
-    {
-        private int l;
-        private int blockSize = 1024;
-        private int blockNumber;
-        private string path;
-        private List<byte> convertedBytes = new List<byte>();
 
-        public SFile(string path)
+    public class SFile
+    {
+        protected byte startByte = 66;
+        protected byte endByte = 56;
+        protected byte trueRecByte = 36;
+
+        protected string sendPath;
+        protected string receivePath;
+        protected int sendBlockSize = 8; //количество байт для отправки и приема
+        protected bool ReceivedRight = false; //переменная для проверки правильности отправки
+        public bool isReceived = false;
+
+        public PhysicalLayer.ComHandler comHandler;
+
+        public SFile(PhysicalLayer.ComHandler comHandler)
         {
-            this.path = path;
+            this.comHandler = comHandler;
         }
 
-        private byte invert(byte b)
+        public string getSendPath()
+        {
+            return this.sendPath;
+        }
+
+        public void setSendPath(string s)
+        {
+            this.sendPath = s;
+        }
+
+        public string getReceiveFile()
+        {
+            return this.receivePath;
+        }
+
+        public void setReceivePath(string s)
+        {
+            this.receivePath = s;
+        }
+
+        protected byte invert(byte b)
         {
             if (b == 0)
                 return 1;
@@ -25,7 +52,7 @@ namespace Cursach.CanalLayer
                 return 0;
         }
 
-        private byte sum(byte a, byte b)
+        protected byte sum(byte a, byte b)
         {
             if (a == 0 && b == 0 || a == 1 && b == 1)
                 return 0;
@@ -33,7 +60,7 @@ namespace Cursach.CanalLayer
                 return 1;
         }
 
-        private byte[] ret(byte[] b, int n)
+        protected byte[] ret(byte[] b, int n)
         {
             byte[] x = new byte[n];
             for (int i = 0; i < 4; i++)
@@ -43,7 +70,7 @@ namespace Cursach.CanalLayer
             return x;
         }
 
-        private byte[] toarr(int n)
+        protected byte[] toarr(int n)
         {
             byte[] rez = new byte[8];
             int m = 128;
@@ -62,7 +89,7 @@ namespace Cursach.CanalLayer
             return rez;
         }
 
-        private byte tobyte(byte[] b)
+        protected byte tobyte(byte[] b)
         {
             byte rez = 0;
             int m = 1;
@@ -73,6 +100,26 @@ namespace Cursach.CanalLayer
             }
             return rez;
         }
+
+        protected void SendSignal(byte b)
+        {
+            byte[] send = new byte[1];
+            send[0] = b;
+            this.comHandler.WriteToCom(send);
+        }
+
+        protected void ReceiveSignal(byte[] b)
+        {
+            byte temp = b[0];
+            if (temp == this.startByte)
+                this.SendSignal(this.startByte);
+            if (temp == this.endByte)
+                this.SendSignal(this.endByte);
+            if (temp == this.trueRecByte)
+                this.ReceivedRight = true;
+        }
+
+        //отправка
 
         private byte[] Ham(byte[] b)
         {
@@ -91,57 +138,44 @@ namespace Cursach.CanalLayer
             return code;
         }
 
-        public byte[] ForSend()
+        public void SendFile()
         {
-            //считываем файл
-
-            byte[] ReadArray;
-            FileStream fstream = File.OpenRead(this.path);
-            ReadArray = new byte[fstream.Length];
-            fstream.Read(ReadArray, 0, ReadArray.Length);
-            fstream.Close();
-
-            this.l = ReadArray.Length;
-            this.blockNumber = this.l / this.blockSize;
-            if (this.l % this.blockSize != 0)
-                this.blockNumber++;
-
+            ReceivedRight = false;
             byte[][] FullByteArray;
             byte[][] HalfByteArray;
             byte[][] CodeByteArray;
             byte[] exmp = new byte[4];
             byte[][] mid;
+            byte[] result;
             byte[] nul = { 0, 0, 0, 0, 0, 0, 0, 0 };
-            byte[] rez = new byte[2 * l];
-            int shift = 0;
-            int border = this.blockSize;
-            int checkLength = this.l;
-
-            for (int y = 0; y < this.blockNumber; y++)
+            byte[] rez = new byte[2 * this.sendBlockSize];
+            byte[] ReadArray;
+            FileStream fstream = File.OpenRead(this.sendPath);
+            long fileLength = fstream.Length;
+            long readSize = 4;
+            for (long i = 0; i < fileLength; i += readSize)
             {
-                if (checkLength < this.blockSize)
-                    border = checkLength;
-
-                FullByteArray = new byte[border][];
-                HalfByteArray = new byte[border * 2][];
-                CodeByteArray = new byte[2 * border][];
-                mid = new byte[2 * border][];
-
-                for (int i = 0; i < border; i++)
+                if ((fileLength - i) < 4)
+                    readSize = fileLength - i;
+                ReadArray = new byte[readSize]; //массив для считывания куска файла
+                fstream.Read(ReadArray, 0, ReadArray.Length); 
+                FullByteArray = new byte[readSize][]; //массив для записи считанных байтов в псевдодвоичном виде (ПДД)
+                HalfByteArray = new byte[readSize * 2][]; //массив для записи байтов в ПДД, разделенных на половинки
+                CodeByteArray = new byte[2 * readSize][]; //массив для записи байтов в ПДД, закодированных кодом хэмминга
+                mid = new byte[2 * readSize][]; //массив для хранения промежуточных данных
+                result = new byte[2 * readSize]; //массив для хранения байтов, готовых для отправки
+                for (int a = 0; a < readSize; a++)
                 {
-                    FullByteArray[i] = toarr(ReadArray[i + shift]);
+                    FullByteArray[a] = toarr(ReadArray[a]);
                 }
-
                 //делим на блоки по 4 байта
-
                 int b = 0;
                 int add = 0;
-
-                for (int i = 0; i < border; i++)
+                for (int a = 0; a < readSize; a++)
                 {
                     for (int x = 0; x < 4; x++)
                     {
-                        exmp[x] = FullByteArray[i][x + add];
+                        exmp[x] = FullByteArray[a][x + add];
                         if (x == 3 && add != 4)
                         {
                             HalfByteArray[b] = ret(exmp, 4);
@@ -154,110 +188,47 @@ namespace Cursach.CanalLayer
                     add = 0;
                     b++;
                 }
-
                 //кодируем кодом Хэмминга
-
-                for (int i = 0; i < 2 * border; i++)
+                for (int a = 0; a < 2 * readSize; a++)
                 {
-                    CodeByteArray[i] = Ham(HalfByteArray[i]);
+                    CodeByteArray[a] = Ham(HalfByteArray[a]);
                 }
-
                 //преобразуем в байты для передачи
-
-                for (int i = 0; i < 2 * border; i++)
+                //суть преобразования - из массивов по 7 знаков (7битных чисел) сделать массивы по 8 знаков, дописав ноль в начале
+                for (int a = 0; a < 2 * readSize; a++)
                 {
-                    mid[i] = ret(nul, 8);
+                    mid[a] = ret(nul, 8);
                 }
-
-                for (int i = 0; i < 2 * border; i++)
+                for (int a = 0; a < 2 * readSize; a++)
                 {
-                    for (int a = 0; a < 7; a++)
+                    for (int c = 0; c < 7; c++)
                     {
-                        mid[i][a + 1] = CodeByteArray[i][a];
+                        mid[a][c + 1] = CodeByteArray[a][c];
                     }
                 }
-
-                for (int i = 0; i < 2 * border; i++)
+                for (int a = 0; a < 2 * readSize; a++)
                 {
-                    this.convertedBytes.Add(tobyte(mid[i]));
+                    result[a] = tobyte(mid[a]);
                 }
-                shift = shift + this.blockSize;
-                checkLength = checkLength - this.blockSize;
-            }
-
-            for (int i = 0; i < 2 * this.l; i++)
-            {
-                rez[i] = this.convertedBytes[i];
-            }
-
-            return rez;
-        }
-
-    }
-    
-    class RFile
-    {
-        private int l;
-        private string path;
-        private List<byte[]> ReceivedHalfs = new List<byte[]>();
-        private int blockSize = 1024;
-        private int blockNumber;
-
-        public RFile(string path)
-        {
-            this.path = path;
-        }
-
-        private byte[] ret(byte[] b, int n)
-        {
-            byte[] x = new byte[n];
-            for (int i = 0; i < 4; i++)
-            {
-                x[i] = b[i];
-            }
-            return x;
-        }
-
-        private byte tobyte(byte[] b)
-        {
-            byte rez = 0;
-            int m = 1;
-            for (int i = 7; i > -1; i--)
-            {
-                rez = Convert.ToByte(rez + (m * b[i]));
-                m = m * 2;
-            }
-            return rez;
-        }
-
-        private byte[] toarr(int n)
-        {
-            byte[] rez = new byte[8];
-            int m = 128;
-            byte s;
-            for (int i = 0; i < 8; i++)
-            {
-                s = Convert.ToByte(n / m);
-                if (s != 0)
+                //result - готовый для отправки блок
+                this.comHandler.WriteToCom(result);
+                while(!isReceived)
                 {
-                    n = n - m;
-                    rez[i] = s;
 
                 }
-                m = Convert.ToByte(m / 2);
+                if (!this.ReceivedRight)
+                    i += readSize;
             }
-            return rez;
+            fstream.Close();
         }
 
-        private byte sum(byte a, byte b)
+        public void SendBlock(byte[] result)
         {
-            ;
-            if (a == 0 && b == 0 || a == 1 && b == 1)
-                return 0;
-            else
-                return 1;
-
+            this.comHandler.WriteToCom(result);
+            //return this.ReceiveSignal();
         }
+
+        //прием
 
         private bool HamCheck(byte[] b)
         {
@@ -284,76 +255,92 @@ namespace Cursach.CanalLayer
             return rez;
         }
 
-        public void ReceiveHalfByte(byte b)
+        public void ReceiveBlock(byte[] b)
         {
-            byte[] mid = toarr(b);
-            byte[] ham = new byte[7];
-            for (int i = 0; i < 7; i++)
+            int length = b.Length;
+            List<byte[]> tmpBytes = new List<byte[]>();
+            byte[] mid = new byte[length];
+            bool check = true;
+            for (int i = 0; i < length; i++)
             {
-                ham[i] = mid[i + 1];
-            }
-            if (!HamCheck(ham))
-            {
-                //TODO: сделать уведомление о неправильной передаче
-            }
-            if (HamCheck(ham))
-            {
-                //TODO: сделать уведомление о правильной передаче
-
-                byte[] halfInBits = UnHam(ham);
-                this.ReceivedHalfs.Add(halfInBits);
-            }
-        }
-
-        public void MakeFile()
-        {
-            int l = this.ReceivedHalfs.Count;
-            this.blockNumber = this.ReceivedHalfs.Count / this.blockSize;
-
-            byte[][] mid = new byte[l / 2][];
-            byte[] nul = { 0, 0, 0, 0, 0, 0, 0, 0 };
-            byte[] rez;
-            for (int i = 0; i < l / 2; i++)
-            {
-                mid[i] = ret(nul, 8);
-            }
-
-            int x = 0;
-            int add = 0;
-
-            //соединяем половинки в целые байты
-
-            for (int i = 0; i < l; i++)
-            {
-                for (int a = 0; a < 4; a++)
+                byte[] tmp = toarr(b[i]);
+                byte[] ham = new byte[7];
+                for (int a = 0; a < 7; a++)
                 {
-                    mid[x][a + add] = this.ReceivedHalfs[i][a];
-                    if (a == 3 && add != 4)
-                    {
-                        i++;
-                        add = 4;
-                        a = -1;
-                    }
+                    ham[a] = tmp[a + 1];
                 }
-                x++;
-                add = 0;
+                if (!HamCheck(ham))
+                {
+                    check = false;
+                    break;
+                }
+                if (HamCheck(ham))
+                {
+                    byte[] halfInBits = UnHam(ham);
+                    tmpBytes.Add(halfInBits);
+                }
             }
-
-            //преобразуем из псевдодвоичного в нормальный вид
-
-            rez = new byte[l / 2];
-
-            for (int i = 0; i < l / 2; i++)
+            if (check)
             {
-                rez[i] = tobyte(mid[i]);
+                //соединяем половинки в целые байты
+                byte[][] FullBytes = new byte[length / 2][];
+                byte[] nul = { 0, 0, 0, 0, 0, 0, 0, 0 };
+                for (int i = 0; i < length / 2; i++)
+                {
+                    FullBytes[i] = ret(nul, 8);
+                }
+                byte[] rez;
+                int add = 0;
+                int x = 0;
+                for (int c = 0; c < length; c++)
+                {
+                    for (int a = 0; a < 4; a++)
+                    {
+                        FullBytes[x][a + add] = tmpBytes[c][a];
+                        if (a == 3 && add != 4)
+                        {
+                            c++;
+                            add = 4;
+                            a = -1;
+                        }
+                    }
+                    x++;
+                    add = 0;
+                }
+
+                //преобразуем из псевдодвоичного в нормальный вид
+
+                rez = new byte[length / 2];
+
+                for (int i = 0; i < length / 2; i++)
+                {
+                    rez[i] = tobyte(FullBytes[i]);
+                }
+
+                FileStream fstream = new FileStream(this.receivePath, FileMode.OpenOrCreate);
+
+                // запись массива байтов в файл
+                fstream.Seek(0, SeekOrigin.End);
+                fstream.Write(rez, 0, rez.Length);
+                Console.WriteLine("Блок записан!");
+                fstream.Close();
+
+                this.SendSignal(this.trueRecByte);
             }
-
-            FileStream fstream = new FileStream(this.path, FileMode.OpenOrCreate);
-
-            // запись массива байтов в файл
-            fstream.Write(rez, 0, rez.Length);
-            Console.WriteLine("Файл передан");
-            fstream.Close();
+            /*
+            if (!check)
+            {
+                this.SendSignal(this.falseRecByte);
+            }
+            */
         }
-    }
+
+        public void ReceiveNewBlock(byte[] b)
+        {
+            if (b.Length == 1)
+                ReceiveSignal(b);
+            if (b.Length > 1)
+                ReceiveBlock(b);
+        }
+    }    
 }
