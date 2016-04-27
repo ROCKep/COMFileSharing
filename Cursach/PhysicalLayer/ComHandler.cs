@@ -4,8 +4,6 @@ using System.Threading;
 
 namespace Cursach.PhysicalLayer
 {
-    public delegate void MessageFunc(string message);
-
     public enum PortState
     {
         Opened,
@@ -38,7 +36,6 @@ namespace Cursach.PhysicalLayer
             return portNames;
         }
 
-
         public PortState SetupCom(string portName, string baudRate, string parity, string dataBits, string stopBits)
         {
             if (ComPort.IsOpen)
@@ -46,7 +43,6 @@ namespace Cursach.PhysicalLayer
                 try
                 {
                     ComPort.Close();
-                    Thread.Sleep(500);
                 }
                 catch
                 {
