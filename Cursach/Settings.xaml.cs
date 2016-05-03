@@ -154,6 +154,7 @@ namespace Cursach
         private void butSend_Click(object sender, RoutedEventArgs e)
         {
             this.SendFile.setSendPath(tbName.Text);
+            while(this.SendFile.ReceivedSignalByte != this.SendFile.)
             this.SendFile.SendFile();
         }
 
