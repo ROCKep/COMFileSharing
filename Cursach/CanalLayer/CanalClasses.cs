@@ -262,7 +262,7 @@ namespace Cursach.CanalLayer
             bool check = true;
             for (int i = 0; i < length; i++)
             {
-                byte[] tmp = toarr(b[i]);
+                byte[] tmp = toarr(bytes[i]);
                 byte[] ham = new byte[7];
                 for (int a = 0; a < 7; a++)
                 {
