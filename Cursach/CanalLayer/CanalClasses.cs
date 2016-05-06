@@ -260,7 +260,7 @@ namespace Cursach.CanalLayer
             List<byte[]> tmpBytes = new List<byte[]>();
             byte[] mid = new byte[length];
             bool check = true;
-            for (int i = 0; i < length; i++)
+            for (int i = 1; i < length; i++) //начинаем с единицы из-за 0 байта с кодом
             {
                 byte[] tmp = toarr(bytes[i]);
                 byte[] ham = new byte[7];
@@ -440,7 +440,7 @@ namespace Cursach.CanalLayer
             HalfByteArray = new byte[readSize * 2][]; //массив для записи байтов в ПДД, разделенных на половинки
             CodeByteArray = new byte[2 * readSize][]; //массив для записи байтов в ПДД, закодированных кодом хэмминга
             mid = new byte[2 * readSize][]; //массив для хранения промежуточных данных
-            result = new byte[2 * readSize]; //массив для хранения байтов, готовых для отправки
+            result = new byte[(2 * this.sendBlockSize) + 1]; //лишний байт для кода, массив для хранения байтов, готовых для отправки
             for (int a = 0; a < readSize; a++)
             {
                 FullByteArray[a] = toarr(bytes[a]);
@@ -483,9 +483,10 @@ namespace Cursach.CanalLayer
                     mid[a][c + 1] = CodeByteArray[a][c];
                 }
             }
+            result[0] = 0x40;
             for (int a = 0; a < 2 * readSize; a++)
             {
-                result[a] = tobyte(mid[a]);
+                result[a+1] = tobyte(mid[a]);
             }
 
             return result;
