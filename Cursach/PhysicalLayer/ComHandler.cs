@@ -153,7 +153,6 @@ namespace Cursach.PhysicalLayer
                 }
                 catch(TimeoutException)
                 {
-                    MessageBox.Show("Таймаут чтения");
                 }
             }
         }
@@ -172,7 +171,6 @@ namespace Cursach.PhysicalLayer
             }
             catch (TimeoutException)
             {
-                MessageBox.Show("Таймаут записи");
             }
         }
     }

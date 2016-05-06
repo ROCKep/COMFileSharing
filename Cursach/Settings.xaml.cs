@@ -71,7 +71,6 @@ namespace Cursach
                     lblStatus.Foreground = Brushes.Black;
                     lblStatus.Content = "Порт открыт";
                     //butConnect.IsEnabled = true;
-                    MessageBox.Show("Порт успешно настроен");
                     break;
                 case PhysicalLayer.PortState.Occupied:
                     lblStatus.Foreground = Brushes.Red;
@@ -174,7 +173,7 @@ namespace Cursach
                     if (dialogResult == true)
                     {
                         rFile = new FileStream(dlg.FileName, FileMode.Create);
-                        canalHandler.RecieveFile();
+                        canalHandler.Acknowledge();
                     }
                     else
                     {
@@ -239,12 +238,12 @@ namespace Cursach
 
         internal void WriteToFile(byte[] frame)
         {
-            rFile.Write(frame, 1, frame.Length - 1);
+            rFile.Write(frame, 0, frame.Length);
         }
 
         internal int ReadFromFile(byte[] frame)
         {
-            int bytesRead = sFile.Read(frame, 1, frame.Length - 1);
+            int bytesRead = sFile.Read(frame, 0, frame.Length);
             return bytesRead;
         }
 

@@ -1,0 +1,16 @@
+C:\Users\Игорь\OneDrive\универ\6 семестр\СТ\Курсовая\COMFileSharing\Cursach\bin\x86\Debug\Cursach.exe.config
+C:\Users\Игорь\OneDrive\универ\6 семестр\СТ\Курсовая\COMFileSharing\Cursach\bin\x86\Debug\Cursach.exe
+C:\Users\Игорь\OneDrive\универ\6 семестр\СТ\Курсовая\COMFileSharing\Cursach\bin\x86\Debug\Cursach.pdb
+C:\Users\Игорь\OneDrive\универ\6 семестр\СТ\Курсовая\COMFileSharing\Cursach\obj\x86\Debug\Cursach.csprojResolveAssemblyReference.cache
+C:\Users\Игорь\OneDrive\универ\6 семестр\СТ\Курсовая\COMFileSharing\Cursach\obj\x86\Debug\MainWindow.g.cs
+C:\Users\Игорь\OneDrive\универ\6 семестр\СТ\Курсовая\COMFileSharing\Cursach\obj\x86\Debug\Settings.g.cs
+C:\Users\Игорь\OneDrive\универ\6 семестр\СТ\Курсовая\COMFileSharing\Cursach\obj\x86\Debug\App.g.cs
+C:\Users\Игорь\OneDrive\универ\6 семестр\СТ\Курсовая\COMFileSharing\Cursach\obj\x86\Debug\Cursach_MarkupCompile.cache
+C:\Users\Игорь\OneDrive\универ\6 семестр\СТ\Курсовая\COMFileSharing\Cursach\obj\x86\Debug\Cursach_MarkupCompile.lref
+C:\Users\Игорь\OneDrive\универ\6 семестр\СТ\Курсовая\COMFileSharing\Cursach\obj\x86\Debug\MainWindow.baml
+C:\Users\Игорь\OneDrive\универ\6 семестр\СТ\Курсовая\COMFileSharing\Cursach\obj\x86\Debug\Settings.baml
+C:\Users\Игорь\OneDrive\универ\6 семестр\СТ\Курсовая\COMFileSharing\Cursach\obj\x86\Debug\Cursach.g.resources
+C:\Users\Игорь\OneDrive\универ\6 семестр\СТ\Курсовая\COMFileSharing\Cursach\obj\x86\Debug\Cursach.Properties.Resources.resources
+C:\Users\Игорь\OneDrive\универ\6 семестр\СТ\Курсовая\COMFileSharing\Cursach\obj\x86\Debug\Cursach.csproj.GenerateResource.Cache
+C:\Users\Игорь\OneDrive\универ\6 семестр\СТ\Курсовая\COMFileSharing\Cursach\obj\x86\Debug\Cursach.exe
+C:\Users\Игорь\OneDrive\универ\6 семестр\СТ\Курсовая\COMFileSharing\Cursach\obj\x86\Debug\Cursach.pdb

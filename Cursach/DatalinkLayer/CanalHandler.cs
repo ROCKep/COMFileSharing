@@ -9,7 +9,7 @@ namespace Cursach.DatalinkLayer
     public class CanalHandler
     {
 
-        //private byte[] sFrame;
+        private byte[] sFrame;
 
         public PhysicalLayer.ComHandler ComManager { get; internal set; }
         public Settings FormsManager { get; internal set; }
@@ -30,15 +30,26 @@ namespace Cursach.DatalinkLayer
                     string fileName = Encoding.Unicode.GetString(frame, 1, frame.Length - 1);
                     FormsManager.SavePrompt(fileName);
                     break;
+                case 0x18:
+                    FormsManager.TransmissionCancel();
+                    break;
                 case 0x6:
-                    Acknowledge(frame[1]);
+                    SendData();
                     break;
                 case 0x14:
-                    NotAcknowledge(frame[1]);
+                    SendAgain();
                     break;
                 case 0x40:
-                    //Decode(frame);
-                    ReceiveData(frame);
+                    frame = Decode(frame);
+                    if (frame[0] == 0x13)
+                    {
+                        NotAcknowledge();
+                    }
+                    else
+                    {
+                        FormsManager.WriteToFile(frame);
+                        Acknowledge();
+                    }
                     break;
                 case 0x4:
                     FormsManager.RecieveSuccess();
@@ -46,50 +57,26 @@ namespace Cursach.DatalinkLayer
             }
         }
 
-        private void NotAcknowledge(byte signal)
+        private void NotAcknowledge()
         {
-            switch (signal)
-            {
-                case 0x25:
-                    FormsManager.TransmissionCancel();
-                    break;
-                case 0x40:
-
-                    break;
-            }
+            byte[] NAK = { 0x14 };
+            ComManager.WriteToCom(NAK);
         }
 
-        private void Acknowledge(byte signal)
+        private void SendAgain()
         {
-            switch (signal)
-            {
-                case 0x25:
-                case 0x40:
-                    SendData();
-                    break;
-                case 0xFF:
-                    FormsManager.ConnectSuccess();
-                    break;
-            }
-        }
-
-        private void ReceiveData(byte[] frame)
-        {
-            FormsManager.WriteToFile(frame);
-            byte[] ACK = { 0x6, 0x40 }; //06h - сигнал потверждения
-            ComManager.WriteToCom(ACK);
+            ComManager.WriteToCom(sFrame);
         }
 
         private void SendData()
         {   
-            byte[] DATA = new byte[255];
-            DATA[0] = 0x40; //40h - сигнал передачи данных
+            byte[] DATA = new byte[64];
             int bytesRead = FormsManager.ReadFromFile(DATA);
             if (bytesRead > 0)
             {
-                Array.Resize(ref DATA, bytesRead + 1);
-                //Encode(DATA);
-                ComManager.WriteToCom(DATA);
+                Array.Resize(ref DATA, bytesRead);
+                sFrame = Encode(DATA);
+                ComManager.WriteToCom(sFrame);
             }
             else
             {
@@ -99,30 +86,26 @@ namespace Cursach.DatalinkLayer
             }
         }
 
-        internal void RecieveFile()
+        internal void Acknowledge()
         {
-            byte[] ACK = { 0x6, 0x25 };
+            byte[] ACK = { 0x6 };
             ComManager.WriteToCom(ACK);
         }
 
         internal void Abort()
         {
-            byte[] NAK = { 0x14, 0x25 }; //18h - сигнал отмены передачи
-            ComManager.WriteToCom(NAK);
+            byte[] CANCEL = { 0x18 }; //18h - сигнал отмены передачи
+            ComManager.WriteToCom(CANCEL);
         }
-    
 
 
-
-
-
-        public byte[] decode(byte[] bytes)
+        public byte[] Decode(byte[] bytes)
         {
             int length = bytes.Length;
             List<byte[]> tmpBytes = new List<byte[]>();
             byte[] mid = new byte[length];
             bool check = true;
-            for (int i = 1; i < length; i++) //начинаем с единицы из-за 0 байта с кодом
+            for (int i = 1; i < length; i++) //начинаем с единицы из-за 0 байта с кодом 
             {
                 byte[] tmp = toarr(bytes[i]);
                 byte[] ham = new byte[7];
@@ -143,7 +126,7 @@ namespace Cursach.DatalinkLayer
             }
             if (check)
             {
-                //соединяем половинки в целые байты
+                //соединяем половинки в целые байты 
                 byte[][] FullBytes = new byte[length / 2][];
                 byte[] nul = { 0, 0, 0, 0, 0, 0, 0, 0 };
                 for (int i = 0; i < length / 2; i++)
@@ -169,7 +152,7 @@ namespace Cursach.DatalinkLayer
                     add = 0;
                 }
 
-                //преобразуем из псевдодвоичного в нормальный вид
+                //преобразуем из псевдодвоичного в нормальный вид 
 
                 rez = new byte[length / 2];
 
@@ -180,7 +163,7 @@ namespace Cursach.DatalinkLayer
                 return rez;
             }
 
-            //что-то происходящее при ошибке, пока пусть так
+            //что-то происходящее при ошибке, пока пусть так 
             byte[] err = new byte[1];
             err[0] = 0x13;
             return err;
@@ -286,9 +269,9 @@ namespace Cursach.DatalinkLayer
             return code;
         }
 
-        public byte[] encode(byte[] bytes)
+        public byte[] Encode(byte[] bytes)
         {
-            int readSize = 8;
+            int size = bytes.Length;
 
             byte[][] FullByteArray;
             byte[][] HalfByteArray;
@@ -297,24 +280,24 @@ namespace Cursach.DatalinkLayer
             byte[][] mid;
             byte[] result;
             byte[] nul = { 0, 0, 0, 0, 0, 0, 0, 0 };
-            byte[] rez = new byte[2 * this.sendBlockSize];
-            FullByteArray = new byte[readSize][]; //массив для записи считанных байтов в псевдодвоичном виде (ПДД)
-            HalfByteArray = new byte[readSize * 2][]; //массив для записи байтов в ПДД, разделенных на половинки
-            CodeByteArray = new byte[2 * readSize][]; //массив для записи байтов в ПДД, закодированных кодом хэмминга
-            mid = new byte[2 * readSize][]; //массив для хранения промежуточных данных
-            result = new byte[(2 * this.sendBlockSize) + 1]; //лишний байт для кода, массив для хранения байтов, готовых для отправки
-            for (int a = 0; a < readSize; a++)
+            byte[] rez = new byte[2 * size];
+            FullByteArray = new byte[size][]; //массив для записи считанных байтов в псевдодвоичном виде (ПДД) 
+            HalfByteArray = new byte[size * 2][]; //массив для записи байтов в ПДД, разделенных на половинки 
+            CodeByteArray = new byte[2 * size][]; //массив для записи байтов в ПДД, закодированных кодом хэмминга 
+            mid = new byte[2 * size][]; //массив для хранения промежуточных данных 
+            result = new byte[(2 * size) + 1]; //лишний байт для кода, массив для хранения байтов, готовых для отправки 
+            for (int a = 0; a < size; a++)
             {
                 FullByteArray[a] = toarr(bytes[a]);
             }
-            //делим на блоки по 4 байта
+            //делим на блоки по 4 байта 
             int b = 0;
             int add = 0;
-            for (int a = 0; a < readSize; a++)
+            for (int a = 0; a < size; a++)
             {
                 for (int x = 0; x < 4; x++)
                 {
-                    exmp[x] = FullByteArray[a][x + add];
+                exmp[x] = FullByteArray[a][x + add];
                     if (x == 3 && add != 4)
                     {
                         HalfByteArray[b] = ret(exmp, 4);
@@ -327,18 +310,18 @@ namespace Cursach.DatalinkLayer
                 add = 0;
                 b++;
             }
-            //кодируем кодом Хэмминга
-            for (int a = 0; a < 2 * readSize; a++)
+            //кодируем кодом Хэмминга 
+            for (int a = 0; a < 2 * size; a++)
             {
                 CodeByteArray[a] = Ham(HalfByteArray[a]);
             }
-            //преобразуем в байты для передачи
-            //суть преобразования - из массивов по 7 знаков (7битных чисел) сделать массивы по 8 знаков, дописав ноль в начале
-            for (int a = 0; a < 2 * readSize; a++)
+            //преобразуем в байты для передачи 
+            //суть преобразования - из массивов по 7 знаков (7битных чисел) сделать массивы по 8 знаков, дописав ноль в начале 
+            for (int a = 0; a < 2 * size; a++)
             {
                 mid[a] = ret(nul, 8);
             }
-            for (int a = 0; a < 2 * readSize; a++)
+            for (int a = 0; a < 2 * size; a++)
             {
                 for (int c = 0; c < 7; c++)
                 {
@@ -346,12 +329,13 @@ namespace Cursach.DatalinkLayer
                 }
             }
             result[0] = 0x40;
-            for (int a = 0; a < 2 * readSize; a++)
+            for (int a = 0; a < 2 * size; a++)
             {
                 result[a + 1] = tobyte(mid[a]);
             }
 
             return result;
         }
+
     }
 }
