@@ -1,47 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text;
-using System.Threading;
 
 namespace Cursach.DatalinkLayer
 {
     public class CanalHandler
     {
 
-        private byte[] sFrame;
+        private byte[] sFrame; //информационный кадр, который в случае ошибки передается заново
 
-        public PhysicalLayer.ComHandler ComManager { get; internal set; }
-        public Settings FormsManager { get; internal set; }
+        //ссылки на другие уровни
+        public PhysicalLayer.ComHandler ComManager { get; set; }
+        public Settings FormsManager { get; set; }
 
-        public void SendFile(string fileName)
-        {
-            byte[] BEGIN = new byte[Encoding.Unicode.GetByteCount(fileName) + 1];
-            BEGIN[0] = 0x25; //25h - cигнал начала передачи
-            Encoding.Unicode.GetBytes(fileName, 0, fileName.Length, BEGIN, 1);
-            ComManager.WriteToCom(BEGIN);
-        }
-
+        /// <summary>
+        /// Обрабатывает полученный кадр
+        /// </summary>
+        /// <param name="frame">Закодированный кадр</param>
         public void RecieveFrame(byte[] frame)
         {
-            //if (frame.Length > 0)
-            //{
                 switch (frame[0])
                 {
-                    case 0x25:
+                    case 0x25: //25h - начало передачи файла (BEGIN)
                         string fileName = Encoding.Unicode.GetString(frame, 1, frame.Length - 1);
                         FormsManager.SavePrompt(fileName);
                         break;
-                    case 0x18:
+                    case 0x18: //18h - отмена передачи файла (CANCEL)
                         FormsManager.TransmissionCancel();
                         break;
-                    case 0x6:
+                    case 0x6: //06h - положительная квитанция (ACK)
                         SendData();
                         break;
-                    case 0x14:
+                    case 0x14: //14h - отрицательная квитанция (NAK)
                         SendAgain();
                         break;
-                    case 0x40:
+                    case 0x40: //40h - информационный кадр (DATA)
                         if (Check(frame))
                         {
                             byte[] rFrame = Decode(frame);
@@ -53,24 +46,44 @@ namespace Cursach.DatalinkLayer
                             NotAcknowledge();
                         }
                         break;
-                    case 0x4:
+                    case 0x4: //04h - конец файла (EOF)
                         FormsManager.ReceiveSuccess();
                         break;
                 }
-            //}
         }
 
+        /// <summary>
+        /// Отправляет кадр начала передачи
+        /// </summary>
+        /// <param name="fileName">Имя файла</param>
+        public void SendFile(string fileName)
+        {
+            byte[] BEGIN = new byte[Encoding.Unicode.GetByteCount(fileName) + 1];
+            BEGIN[0] = 0x25;
+            Encoding.Unicode.GetBytes(fileName, 0, fileName.Length, BEGIN, 1);
+            ComManager.WriteToCom(BEGIN);
+        }
+
+        /// <summary>
+        /// Отправляет отрицательную квитанцию
+        /// </summary>
         private void NotAcknowledge()
         {
             byte[] NAK = { 0x14 };
             ComManager.WriteToCom(NAK);
         }
 
+        /// <summary>
+        /// Отправляет заново информационный кадр
+        /// </summary>
         private void SendAgain()
         {
             ComManager.WriteToCom(sFrame);
         }
 
+        /// <summary>
+        /// Отправляет информационный кадр или EOF
+        /// </summary>
         private void SendData()
         {   
             byte[] DATA = new byte[64];
@@ -89,18 +102,29 @@ namespace Cursach.DatalinkLayer
             }
         }
 
+        /// <summary>
+        /// Отправляет положительную квитанцию
+        /// </summary>
         public void Acknowledge()
         {
             byte[] ACK = { 0x6 };
             ComManager.WriteToCom(ACK);
         }
 
+        /// <summary>
+        /// Отправляет кадр отмены передачи
+        /// </summary>
         public void Abort()
         {
-            byte[] CANCEL = { 0x18 }; //18h - сигнал отмены передачи
+            byte[] CANCEL = { 0x18 }; 
             ComManager.WriteToCom(CANCEL);
         }
 
+        /// <summary>
+        /// Проверяет полученный кадр на ошибки
+        /// </summary>
+        /// <param name="bytes">Закодированный кадр</param>
+        /// <returns></returns>
         private bool Check(byte[] bytes)
         {
             bool check = true;
@@ -123,6 +147,11 @@ namespace Cursach.DatalinkLayer
             return check;
         }
 
+        /// <summary>
+        /// Декодирует полученный кадр
+        /// </summary>
+        /// <param name="bytes">Закодированный кадр</param>
+        /// <returns></returns>
         private byte[] Decode(byte[] bytes)
         {
             int length = bytes.Length;
@@ -175,6 +204,79 @@ namespace Cursach.DatalinkLayer
                 rez[i] = tobyte(FullBytes[i]);
             }
             return rez;
+        }
+
+        /// <summary>
+        /// Кодирует пересылаемый кадр
+        /// </summary>
+        /// <param name="bytes">Исходный кадр</param>
+        /// <returns></returns>
+        private byte[] Encode(byte[] bytes)
+        {
+            int size = bytes.Length;
+
+            byte[][] FullByteArray;
+            byte[][] HalfByteArray;
+            byte[][] CodeByteArray;
+            byte[] exmp = new byte[4];
+            byte[][] mid;
+            byte[] result;
+            byte[] nul = { 0, 0, 0, 0, 0, 0, 0, 0 };
+            byte[] rez = new byte[2 * size];
+            FullByteArray = new byte[size][]; //массив для записи считанных байтов в псевдодвоичном виде (ПДД) 
+            HalfByteArray = new byte[size * 2][]; //массив для записи байтов в ПДД, разделенных на половинки 
+            CodeByteArray = new byte[2 * size][]; //массив для записи байтов в ПДД, закодированных кодом хэмминга 
+            mid = new byte[2 * size][]; //массив для хранения промежуточных данных 
+            result = new byte[(2 * size) + 1]; //лишний байт для кода, массив для хранения байтов, готовых для отправки 
+            for (int a = 0; a < size; a++)
+            {
+                FullByteArray[a] = toarr(bytes[a]);
+            }
+            //делим на блоки по 4 байта 
+            int b = 0;
+            int add = 0;
+            for (int a = 0; a < size; a++)
+            {
+                for (int x = 0; x < 4; x++)
+                {
+                    exmp[x] = FullByteArray[a][x + add];
+                    if (x == 3 && add != 4)
+                    {
+                        HalfByteArray[b] = ret(exmp, 4);
+                        b++;
+                        add = 4;
+                        x = -1;
+                    }
+                }
+                HalfByteArray[b] = ret(exmp, 4);
+                add = 0;
+                b++;
+            }
+            //кодируем кодом Хэмминга 
+            for (int a = 0; a < 2 * size; a++)
+            {
+                CodeByteArray[a] = Ham(HalfByteArray[a]);
+            }
+            //преобразуем в байты для передачи 
+            //суть преобразования - из массивов по 7 знаков (7битных чисел) сделать массивы по 8 знаков, дописав ноль в начале 
+            for (int a = 0; a < 2 * size; a++)
+            {
+                mid[a] = ret(nul, 8);
+            }
+            for (int a = 0; a < 2 * size; a++)
+            {
+                for (int c = 0; c < 7; c++)
+                {
+                    mid[a][c + 1] = CodeByteArray[a][c];
+                }
+            }
+            result[0] = 0x40;
+            for (int a = 0; a < 2 * size; a++)
+            {
+                result[a + 1] = tobyte(mid[a]);
+            }
+
+            return result;
         }
 
         private bool HamCheck(byte[] b)
@@ -275,74 +377,6 @@ namespace Cursach.DatalinkLayer
             code[3] = sum(sum(code[3], code[4]), sum(code[5], code[6]));
 
             return code;
-        }
-
-        private byte[] Encode(byte[] bytes)
-        {
-            int size = bytes.Length;
-
-            byte[][] FullByteArray;
-            byte[][] HalfByteArray;
-            byte[][] CodeByteArray;
-            byte[] exmp = new byte[4];
-            byte[][] mid;
-            byte[] result;
-            byte[] nul = { 0, 0, 0, 0, 0, 0, 0, 0 };
-            byte[] rez = new byte[2 * size];
-            FullByteArray = new byte[size][]; //массив для записи считанных байтов в псевдодвоичном виде (ПДД) 
-            HalfByteArray = new byte[size * 2][]; //массив для записи байтов в ПДД, разделенных на половинки 
-            CodeByteArray = new byte[2 * size][]; //массив для записи байтов в ПДД, закодированных кодом хэмминга 
-            mid = new byte[2 * size][]; //массив для хранения промежуточных данных 
-            result = new byte[(2 * size) + 1]; //лишний байт для кода, массив для хранения байтов, готовых для отправки 
-            for (int a = 0; a < size; a++)
-            {
-                FullByteArray[a] = toarr(bytes[a]);
-            }
-            //делим на блоки по 4 байта 
-            int b = 0;
-            int add = 0;
-            for (int a = 0; a < size; a++)
-            {
-                for (int x = 0; x < 4; x++)
-                {
-                exmp[x] = FullByteArray[a][x + add];
-                    if (x == 3 && add != 4)
-                    {
-                        HalfByteArray[b] = ret(exmp, 4);
-                        b++;
-                        add = 4;
-                        x = -1;
-                    }
-                }
-                HalfByteArray[b] = ret(exmp, 4);
-                add = 0;
-                b++;
-            }
-            //кодируем кодом Хэмминга 
-            for (int a = 0; a < 2 * size; a++)
-            {
-                CodeByteArray[a] = Ham(HalfByteArray[a]);
-            }
-            //преобразуем в байты для передачи 
-            //суть преобразования - из массивов по 7 знаков (7битных чисел) сделать массивы по 8 знаков, дописав ноль в начале 
-            for (int a = 0; a < 2 * size; a++)
-            {
-                mid[a] = ret(nul, 8);
-            }
-            for (int a = 0; a < 2 * size; a++)
-            {
-                for (int c = 0; c < 7; c++)
-                {
-                    mid[a][c + 1] = CodeByteArray[a][c];
-                }
-            }
-            result[0] = 0x40;
-            for (int a = 0; a < 2 * size; a++)
-            {
-                result[a + 1] = tobyte(mid[a]);
-            }
-
-            return result;
         }
 
     }

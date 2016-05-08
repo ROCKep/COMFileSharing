@@ -5,6 +5,9 @@ using System.Threading;
 
 namespace Cursach.PhysicalLayer
 {
+    /// <summary>
+    /// Определяет статус COM-порта
+    /// </summary>
     public enum PortState
     {
         Opened,
@@ -15,6 +18,9 @@ namespace Cursach.PhysicalLayer
         Connected
     }
 
+    /// <summary>
+    /// Класс физического уровня
+    /// </summary>
     public class ComHandler
     {
         private byte[] rFrame;
@@ -23,8 +29,9 @@ namespace Cursach.PhysicalLayer
 
         private SerialPort serialPort;
 
-        public bool IsConnected { get; private set; }
+        public bool IsConnected { get; private set; } //Статус соединения
 
+        // Ссылки на другие уровни
         public Settings FormsManager { get; set; }
         public DatalinkLayer.CanalHandler CanalManager { get; set; }
 
@@ -41,7 +48,7 @@ namespace Cursach.PhysicalLayer
         }
 
         /// <summary>
-        ///Статический метод, возвращающий сортированный список COM-портов
+        /// Возвращает сортированный список COM-портов
         /// </summary>
         public static string[] GetSortedPortNames()
         {
@@ -56,7 +63,6 @@ namespace Cursach.PhysicalLayer
         public PortState OpenCom(string portName, string baudRate, string parity, string dataBits, string stopBits)
         {
             CloseCom();
-            serialPort.DtrEnable = false;
             try
             {
                 serialPort.PortName = portName.Trim();
@@ -70,8 +76,6 @@ namespace Cursach.PhysicalLayer
                 serialPort.WriteTimeout = 500;
 
                 serialPort.Open();
-                //serialPort.DiscardOutBuffer();
-                //serialPort.DiscardInBuffer();
                 serialPort.DtrEnable = true;
                 if (serialPort.DsrHolding)
                 {
@@ -97,18 +101,60 @@ namespace Cursach.PhysicalLayer
             }
         }
 
+        /// <summary>
+        /// Закрывает COM-порт
+        /// </summary>
         public void CloseCom()
         {
             if (serialPort.IsOpen)
             {
                 serialPort.Close();
+                serialPort.DtrEnable = false;
                 IsConnected = false;
                 Thread.Sleep(100);
             }
         }
 
         /// <summary>
-        /// Обработчик события, возникающего при обрыве соединения
+        /// Записывает кадр в COM-порт
+        /// </summary>
+        /// <param name="frame">Отправляемый кадр</param>
+        public void WriteToCom(byte[] frame)
+        {
+            byte[] sBuffer = new byte[frame.Length + 1];
+            sBuffer[0] = Convert.ToByte(frame.Length);
+            for (int i = 1; i < sBuffer.Length; i++)
+            {
+                sBuffer[i] = frame[i - 1];
+            }
+            serialPort.Write(sBuffer, 0, sBuffer.Length);
+        }
+
+        /// <summary>
+        /// Обработчик события, возникающего при получении данных с COM-порта
+        /// </summary>
+        private void ComPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            while (serialPort.BytesToRead > 0)
+            {
+                if (size == 0)
+                {
+                    size = serialPort.ReadByte();
+                    rFrame = new byte[size];
+                }
+                int bytesRead = serialPort.Read(rFrame, count, size - count);
+                count += bytesRead;
+                if (count == size)
+                {
+                    count = 0;
+                    size = 0;
+                    CanalManager.RecieveFrame(rFrame);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Обработчик события, возникающего при изменении состояния пинов COM-порта
         /// </summary>
         private void ComPort_PinChanged(object sender, SerialPinChangedEventArgs e)
         {
@@ -131,43 +177,6 @@ namespace Cursach.PhysicalLayer
                     }
                     break;
             }
-        }
-
-        /// <summary>
-        /// Обработчик события, возникающего при получении данных с COM-порта
-        /// </summary>
-        private void ComPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
-        {
-            //if (serialPort.IsOpen)
-            //{
-                while (serialPort.BytesToRead > 0)
-                {
-                    if (size == 0)
-                    {
-                        size = serialPort.ReadByte();
-                        rFrame = new byte[size];
-                    }
-                    int bytesRead = serialPort.Read(rFrame, count, size - count);
-                    count += bytesRead;
-                    if (count == size)
-                    {
-                        count = 0;
-                        size = 0;
-                        CanalManager.RecieveFrame(rFrame);
-                    }
-                }
-            //}
-        }
-
-        public void WriteToCom(byte[] frame)
-        {
-            byte[] sBuffer = new byte[frame.Length + 1];
-            sBuffer[0] = Convert.ToByte(frame.Length);
-            for (int i = 1; i < sBuffer.Length; i++)
-            {
-                sBuffer[i] = frame[i - 1];
-            }
-            serialPort.Write(sBuffer, 0, sBuffer.Length);
         }
     }
 }

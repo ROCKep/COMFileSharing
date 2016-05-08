@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows.Media;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.IO;
@@ -13,13 +12,14 @@ namespace Cursach
     /// </summary>
     public partial class Settings : Window
     {
+        //ссылки на другие уровни
         private PhysicalLayer.ComHandler comHandler;
         private DatalinkLayer.CanalHandler canalHandler;
 
-        private FileStream sFile;
-        private FileStream rFile;
+        private FileStream sFile; // передаваемый файл
+        private FileStream rFile; // принимаемый файл
 
-        private DispatcherTimer timer;
+        private DispatcherTimer timer; // таймер, обновляющий на форме количество принятых байт
 
         public Settings()
         { 
@@ -29,9 +29,11 @@ namespace Cursach
             comHandler.FormsManager = this;
             canalHandler.ComManager = comHandler;
             comHandler.CanalManager = canalHandler;
+
             timer = new DispatcherTimer();
             timer.Tick += Timer_Tick;
-            timer.Interval = new TimeSpan(0,0,0,0,500);
+            timer.Interval = new TimeSpan(0,0,0,0,500); // таймер вызывает функцию раз в 500 мс
+
             InitializeComponent();
         }
 
@@ -44,6 +46,9 @@ namespace Cursach
             CloseFiles();
         }
 
+        /// <summary>
+        /// Обработчик события, возникающего при загрузке формы
+        /// </summary>
         private void WinSettings_Loaded(object sender, RoutedEventArgs e)
         {
             string[] ports;
@@ -69,6 +74,9 @@ namespace Cursach
             }
         }
 
+        /// <summary>
+        /// Обработчик события, возникающего при нажатии на кнопку "ОК"
+        /// </summary>
         private void butOK_Click(object sender, RoutedEventArgs e)
         {
             PhysicalLayer.PortState portState = comHandler.OpenCom(
@@ -105,57 +113,9 @@ namespace Cursach
             }
         }
 
-        public void ConnectFail()
-        {
-            if (timer.IsEnabled)
-            {
-                timer.Stop();
-            }
-            CloseFiles();
-            comHandler.CloseCom();
-            Dispatcher.Invoke(new Action(() =>
-            {
-                butOK.IsEnabled = true;
-                lblStatus.Foreground = Brushes.Red;
-                lblStatus.Content = "Порт не открыт";
-                gbxChooseFile.IsEnabled = false;
-                gbxSendProgress.Visibility = Visibility.Hidden;
-                gbxReceiveProgress.Visibility = Visibility.Hidden;
-                MessageBox.Show("Соединение с другим компьютером прервано");
-            }));
-        }
-
-        public void ConnectBroke()
-        {
-            if (timer.IsEnabled)
-            {
-                timer.Stop();
-            }
-            CloseFiles();
-            comHandler.CloseCom();
-            Dispatcher.Invoke(new Action(() =>
-            {
-                butOK.IsEnabled = true;
-                lblStatus.Foreground = Brushes.Red;
-                lblStatus.Content = "Порт не открыт";
-                gbxChooseFile.IsEnabled = false;
-                gbxSendProgress.Visibility = Visibility.Hidden;
-                gbxReceiveProgress.Visibility = Visibility.Hidden;
-                MessageBox.Show("Обрыв соединения");
-            }));
-        }
-
-        public void ConnectSuccess()
-        {
-            Dispatcher.Invoke(new Action(() =>
-            {
-                lblStatus.Foreground = Brushes.Green;
-                lblStatus.Content = "Соединение установлено";
-                gbxChooseFile.IsEnabled = true;
-                MessageBox.Show("Соединение с другим компьютером установлено");
-            }));
-        }
-
+        /// <summary>
+        /// Обработчик события, возникающего при нажатии на кнопку "Поиск"
+        /// </summary>
         private void butBrowse_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
@@ -167,6 +127,9 @@ namespace Cursach
             }
         }
 
+        /// <summary>
+        /// Обработчик события, возникающего при нажатии на кнопку "Отправить"
+        /// </summary>
         private void butSend_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -187,6 +150,9 @@ namespace Cursach
             }
         }
 
+        /// <summary>
+        /// Обработчик события, возникающего при изменении текста в tbName
+        /// </summary>
         private void tbName_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (tbName.Text != string.Empty)
@@ -199,6 +165,85 @@ namespace Cursach
             }
         }
 
+        /// <summary>
+        /// Обработчик события, возникающего при закрытии формы
+        /// </summary>
+        private void WinSettings_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (sFile != null || rFile != null)
+            {
+                MessageBoxResult result = MessageBox.Show("Программа в данный момент занята. Вы действительно хотите выйти из программы?", "Внимание", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.No)
+                {
+                    e.Cancel = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Останавливает программу, когда закрылась программа на другом компьютере
+        /// </summary>
+        public void ConnectFail()
+        {
+            if (timer.IsEnabled)
+            {
+                timer.Stop();
+            }
+            CloseFiles();
+            comHandler.CloseCom();
+            Dispatcher.Invoke(new Action(() =>
+            {
+                butOK.IsEnabled = true;
+                lblStatus.Foreground = Brushes.Red;
+                lblStatus.Content = "Порт не открыт";
+                gbxChooseFile.IsEnabled = false;
+                gbxSendProgress.Visibility = Visibility.Hidden;
+                gbxReceiveProgress.Visibility = Visibility.Hidden;
+                MessageBox.Show("Соединение с другим компьютером прервано");
+            }));
+        }
+
+        /// <summary>
+        /// Останавливает программу из-за обрыва соединения
+        /// </summary>
+        public void ConnectBroke()
+        {
+            if (timer.IsEnabled)
+            {
+                timer.Stop();
+            }
+            CloseFiles();
+            comHandler.CloseCom();
+            Dispatcher.Invoke(new Action(() =>
+            {
+                butOK.IsEnabled = true;
+                lblStatus.Foreground = Brushes.Red;
+                lblStatus.Content = "Порт не открыт";
+                gbxChooseFile.IsEnabled = false;
+                gbxSendProgress.Visibility = Visibility.Hidden;
+                gbxReceiveProgress.Visibility = Visibility.Hidden;
+                MessageBox.Show("Обрыв соединения");
+            }));
+        }
+
+        /// <summary>
+        /// Показывает информацию о том, что соединение установлено
+        /// </summary>
+        public void ConnectSuccess()
+        {
+            Dispatcher.Invoke(new Action(() =>
+            {
+                lblStatus.Foreground = Brushes.Green;
+                lblStatus.Content = "Соединение установлено";
+                gbxChooseFile.IsEnabled = true;
+                MessageBox.Show("Соединение с другим компьютером установлено");
+            }));
+        }
+
+        /// <summary>
+        /// Показывает Message Box с запросом принятия файла
+        /// </summary>
+        /// <param name="fileName">Имя файла</param>
         public void SavePrompt(string fileName)
         {
             Dispatcher.BeginInvoke(new Action(() =>
@@ -215,6 +260,10 @@ namespace Cursach
             }));
         }
 
+        /// <summary>
+        /// Открывает диалоговое окно сохранения файла
+        /// </summary>
+        /// <param name="fileName">Имя файла</param>
         private void SaveFile(string fileName)
         {
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
@@ -248,11 +297,17 @@ namespace Cursach
             }
         }
 
+        /// <summary>
+        /// Функция, вызываемая таймером
+        /// </summary>
         private void Timer_Tick(object sender, EventArgs e)
         {
             lblReceiveProgress.Content = string.Format("Принято {0:f2} КБ", rFile.Length / 1024.0);
         }
 
+        /// <summary>
+        /// Останавливает передачу, т.к. передача была отменена на другом компьютере
+        /// </summary>
         public void TransmissionCancel()
         {
             Dispatcher.Invoke(new Action(() =>
@@ -269,6 +324,9 @@ namespace Cursach
             }));
         }
 
+        /// <summary>
+        /// Закрывает открытые файлы
+        /// </summary>
         private void CloseFiles()
         {
             if (rFile != null)
@@ -283,6 +341,9 @@ namespace Cursach
             }
         }
 
+        /// <summary>
+        /// Показывает информацию о том, что файл принят
+        /// </summary>
         public void ReceiveSuccess()
         {
             Dispatcher.BeginInvoke(new Action(() =>
@@ -302,6 +363,9 @@ namespace Cursach
             }));
         }
 
+        /// <summary>
+        /// Показывает информацию о том, что файл передан
+        /// </summary>
         public void SendSuccess()
         {
             Dispatcher.BeginInvoke(new Action(() => 
@@ -318,14 +382,23 @@ namespace Cursach
             }));
         }
 
-        public void WriteToFile(byte[] frame)
+        /// <summary>
+        /// Записывает информацию в файл
+        /// </summary>
+        /// <param name="bytes">Массив, который нужно записать в файл</param>
+        public void WriteToFile(byte[] bytes)
         {
-            rFile.Write(frame, 0, frame.Length);
+            rFile.Write(bytes, 0, bytes.Length);
         }
 
-        public int ReadFromFile(byte[] frame)
+        /// <summary>
+        /// Считывает информацию из файла
+        /// </summary>
+        /// <param name="bytes">Массив, в который нужно считать из файла</param>
+        /// <returns></returns>
+        public int ReadFromFile(byte[] bytes)
         {
-            int bytesRead = sFile.Read(frame, 0, frame.Length);
+            int bytesRead = sFile.Read(bytes, 0, bytes.Length);
             Dispatcher.Invoke(new Action(() =>
             {
                 pbrSendProgress.Value += bytesRead;
@@ -333,17 +406,7 @@ namespace Cursach
             return bytesRead;
         }
 
-        private void WinSettings_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            if (sFile != null || rFile != null)
-            {
-                MessageBoxResult result = MessageBox.Show("Программа в данный момент занята. Вы действительно хотите выйти из программы?", "Внимание", MessageBoxButton.YesNo);
-                if (result == MessageBoxResult.No)
-                {
-                    e.Cancel = true;
-                }
-            }
-        }
+
 
         //public void ShowMessage(string msg)
         //{
