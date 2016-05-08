@@ -14,7 +14,7 @@ namespace Cursach.DatalinkLayer
         public PhysicalLayer.ComHandler ComManager { get; internal set; }
         public Settings FormsManager { get; internal set; }
 
-        internal void SendFile(string fileName)
+        public void SendFile(string fileName)
         {
             byte[] BEGIN = new byte[Encoding.Unicode.GetByteCount(fileName) + 1];
             BEGIN[0] = 0x25; //25h - cигнал начала передачи
@@ -22,39 +22,42 @@ namespace Cursach.DatalinkLayer
             ComManager.WriteToCom(BEGIN);
         }
 
-        internal void RecieveFrame(byte[] frame)
+        public void RecieveFrame(byte[] frame)
         {
-            switch(frame[0])
-            {
-                case 0x25:
-                    string fileName = Encoding.Unicode.GetString(frame, 1, frame.Length - 1);
-                    FormsManager.SavePrompt(fileName);
-                    break;
-                case 0x18:
-                    FormsManager.TransmissionCancel();
-                    break;
-                case 0x6:
-                    SendData();
-                    break;
-                case 0x14:
-                    SendAgain();
-                    break;
-                case 0x40:
-                    frame = Decode(frame);
-                    if (frame[0] == 0x13)
-                    {
-                        NotAcknowledge();
-                    }
-                    else
-                    {
-                        FormsManager.WriteToFile(frame);
-                        Acknowledge();
-                    }
-                    break;
-                case 0x4:
-                    FormsManager.RecieveSuccess();
-                    break;
-            }
+            //if (frame.Length > 0)
+            //{
+                switch (frame[0])
+                {
+                    case 0x25:
+                        string fileName = Encoding.Unicode.GetString(frame, 1, frame.Length - 1);
+                        FormsManager.SavePrompt(fileName);
+                        break;
+                    case 0x18:
+                        FormsManager.TransmissionCancel();
+                        break;
+                    case 0x6:
+                        SendData();
+                        break;
+                    case 0x14:
+                        SendAgain();
+                        break;
+                    case 0x40:
+                        if (Check(frame))
+                        {
+                            byte[] rFrame = Decode(frame);
+                            FormsManager.WriteToFile(rFrame);
+                            Acknowledge();
+                        }
+                        else
+                        {
+                            NotAcknowledge();
+                        }
+                        break;
+                    case 0x4:
+                        FormsManager.ReceiveSuccess();
+                        break;
+                }
+            //}
         }
 
         private void NotAcknowledge()
@@ -86,25 +89,23 @@ namespace Cursach.DatalinkLayer
             }
         }
 
-        internal void Acknowledge()
+        public void Acknowledge()
         {
             byte[] ACK = { 0x6 };
             ComManager.WriteToCom(ACK);
         }
 
-        internal void Abort()
+        public void Abort()
         {
             byte[] CANCEL = { 0x18 }; //18h - сигнал отмены передачи
             ComManager.WriteToCom(CANCEL);
         }
 
-
-        public byte[] Decode(byte[] bytes)
+        private bool Check(byte[] bytes)
         {
-            int length = bytes.Length;
-            List<byte[]> tmpBytes = new List<byte[]>();
-            byte[] mid = new byte[length];
             bool check = true;
+            int length = bytes.Length;
+            byte[] mid = new byte[length];
             for (int i = 1; i < length; i++) //начинаем с единицы из-за 0 байта с кодом 
             {
                 byte[] tmp = toarr(bytes[i]);
@@ -118,55 +119,62 @@ namespace Cursach.DatalinkLayer
                     check = false;
                     break;
                 }
-                if (HamCheck(ham))
-                {
-                    byte[] halfInBits = UnHam(ham);
-                    tmpBytes.Add(halfInBits);
-                }
             }
-            if (check)
+            return check;
+        }
+
+        private byte[] Decode(byte[] bytes)
+        {
+            int length = bytes.Length;
+            List<byte[]> tmpBytes = new List<byte[]>();
+            byte[] mid = new byte[length];
+            for (int i = 1; i < length; i++) //начинаем с единицы из-за 0 байта с кодом 
             {
-                //соединяем половинки в целые байты 
-                byte[][] FullBytes = new byte[length / 2][];
-                byte[] nul = { 0, 0, 0, 0, 0, 0, 0, 0 };
-                for (int i = 0; i < length / 2; i++)
+                byte[] tmp = toarr(bytes[i]);
+                byte[] ham = new byte[7];
+                for (int a = 0; a < 7; a++)
                 {
-                    FullBytes[i] = ret(nul, 8);
+                    ham[a] = tmp[a + 1];
                 }
-                byte[] rez;
-                int add = 0;
-                int x = 0;
-                for (int c = 0; c < length; c++)
+                byte[] halfInBits = UnHam(ham);
+                tmpBytes.Add(halfInBits);
+            }
+            length--;
+            //соединяем половинки в целые байты 
+            byte[][] FullBytes = new byte[length / 2][];
+            byte[] nul = { 0, 0, 0, 0, 0, 0, 0, 0 };
+            for (int i = 0; i < length / 2; i++)
+            {
+                FullBytes[i] = ret(nul, 8);
+            }
+            byte[] rez;
+            int add = 0;
+            int x = 0;
+            for (int c = 0; c < length; c++)
+            {
+                for (int a = 0; a < 4; a++)
                 {
-                    for (int a = 0; a < 4; a++)
+                    FullBytes[x][a + add] = tmpBytes[c][a];
+                    if (a == 3 && add != 4)
                     {
-                        FullBytes[x][a + add] = tmpBytes[c][a];
-                        if (a == 3 && add != 4)
-                        {
-                            c++;
-                            add = 4;
-                            a = -1;
-                        }
+                        c++;
+                        add = 4;
+                        a = -1;
                     }
-                    x++;
-                    add = 0;
                 }
-
-                //преобразуем из псевдодвоичного в нормальный вид 
-
-                rez = new byte[length / 2];
-
-                for (int i = 0; i < length / 2; i++)
-                {
-                    rez[i] = tobyte(FullBytes[i]);
-                }
-                return rez;
+                x++;
+                add = 0;
             }
 
-            //что-то происходящее при ошибке, пока пусть так 
-            byte[] err = new byte[1];
-            err[0] = 0x13;
-            return err;
+            //преобразуем из псевдодвоичного в нормальный вид 
+
+            rez = new byte[length / 2];
+
+            for (int i = 0; i < length / 2; i++)
+            {
+                rez[i] = tobyte(FullBytes[i]);
+            }
+            return rez;
         }
 
         private bool HamCheck(byte[] b)
@@ -195,7 +203,7 @@ namespace Cursach.DatalinkLayer
         }
 
 
-        protected byte invert(byte b)
+        private byte invert(byte b)
         {
             if (b == 0)
                 return 1;
@@ -203,7 +211,7 @@ namespace Cursach.DatalinkLayer
                 return 0;
         }
 
-        protected byte sum(byte a, byte b)
+        private byte sum(byte a, byte b)
         {
             if (a == 0 && b == 0 || a == 1 && b == 1)
                 return 0;
@@ -211,7 +219,7 @@ namespace Cursach.DatalinkLayer
                 return 1;
         }
 
-        protected byte[] ret(byte[] b, int n)
+        private byte[] ret(byte[] b, int n)
         {
             byte[] x = new byte[n];
             for (int i = 0; i < 4; i++)
@@ -221,7 +229,7 @@ namespace Cursach.DatalinkLayer
             return x;
         }
 
-        protected byte[] toarr(int n)
+        private byte[] toarr(int n)
         {
             byte[] rez = new byte[8];
             int m = 128;
@@ -240,7 +248,7 @@ namespace Cursach.DatalinkLayer
             return rez;
         }
 
-        protected byte tobyte(byte[] b)
+        private byte tobyte(byte[] b)
         {
             byte rez = 0;
             int m = 1;
@@ -269,7 +277,7 @@ namespace Cursach.DatalinkLayer
             return code;
         }
 
-        public byte[] Encode(byte[] bytes)
+        private byte[] Encode(byte[] bytes)
         {
             int size = bytes.Length;
 

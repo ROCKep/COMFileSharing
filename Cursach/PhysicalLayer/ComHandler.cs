@@ -2,7 +2,6 @@
 using System.IO.Ports;
 using System.Text;
 using System.Threading;
-using System.Windows;
 
 namespace Cursach.PhysicalLayer
 {
@@ -12,7 +11,8 @@ namespace Cursach.PhysicalLayer
         Occupied,
         InvalidArgs,
         Error,
-        Closed
+        Closed,
+        Connected
     }
 
     public class ComHandler
@@ -22,7 +22,8 @@ namespace Cursach.PhysicalLayer
         private int size = 0;
 
         private SerialPort serialPort;
-        private bool isConnected = false;
+
+        public bool IsConnected { get; private set; }
 
         public Settings FormsManager { get; set; }
         public DatalinkLayer.CanalHandler CanalManager { get; set; }
@@ -32,6 +33,11 @@ namespace Cursach.PhysicalLayer
             serialPort = new SerialPort();
             serialPort.DataReceived += new SerialDataReceivedEventHandler(ComPort_DataReceived);
             serialPort.PinChanged += new SerialPinChangedEventHandler(ComPort_PinChanged);
+        }
+
+        ~ComHandler()
+        {
+            CloseCom();
         }
 
         /// <summary>
@@ -50,6 +56,7 @@ namespace Cursach.PhysicalLayer
         public PortState OpenCom(string portName, string baudRate, string parity, string dataBits, string stopBits)
         {
             CloseCom();
+            serialPort.DtrEnable = false;
             try
             {
                 serialPort.PortName = portName.Trim();
@@ -61,9 +68,20 @@ namespace Cursach.PhysicalLayer
                 serialPort.Handshake = Handshake.None;
                 serialPort.ReadTimeout = 500;
                 serialPort.WriteTimeout = 500;
+
                 serialPort.Open();
+                //serialPort.DiscardOutBuffer();
+                //serialPort.DiscardInBuffer();
                 serialPort.DtrEnable = true;
-                return PortState.Opened;
+                if (serialPort.DsrHolding)
+                {
+                    IsConnected = true;
+                    return PortState.Connected;
+                }
+                else
+                {
+                    return PortState.Opened;
+                }
             }
             catch (UnauthorizedAccessException)
             {
@@ -84,6 +102,7 @@ namespace Cursach.PhysicalLayer
             if (serialPort.IsOpen)
             {
                 serialPort.Close();
+                IsConnected = false;
                 Thread.Sleep(100);
             }
         }
@@ -96,36 +115,22 @@ namespace Cursach.PhysicalLayer
             switch (e.EventType)
             {
                 case SerialPinChange.Break:
-                    MessageBox.Show("Обрыв соединения");
-                    isConnected = false;
+                    IsConnected = false;
+                    FormsManager.ConnectBroke();
                     break;
                 case SerialPinChange.DsrChanged:
-                    if (serialPort.DsrHolding && !isConnected)
+                    if (serialPort.DsrHolding && !IsConnected)
                     {
-                        serialPort.RtsEnable = true;
-                        isConnected = true;
-                        MessageBox.Show("Соединение установлено");
+                        IsConnected = true;
+                        FormsManager.ConnectSuccess();
                     }
-                    else if (!serialPort.DsrHolding && isConnected)
+                    else if (!serialPort.DsrHolding && IsConnected)
                     {
-                        isConnected = false;
-                        MessageBox.Show("Соединение с другим компьютером прервано");
-                    }
-                    break;
-                case SerialPinChange.CtsChanged:
-                    if (serialPort.CtsHolding && !isConnected)
-                    {
-                        isConnected = true;
-                        MessageBox.Show("Соединение установлено");
-                    }
-                    else if (!serialPort.CtsHolding && isConnected)
-                    {
-                        isConnected = false;
-                        MessageBox.Show("Соединение с другим компьютером прервано");
+                        IsConnected = false;
+                        FormsManager.ConnectFail();
                     }
                     break;
             }
-
         }
 
         /// <summary>
@@ -133,9 +138,9 @@ namespace Cursach.PhysicalLayer
         /// </summary>
         private void ComPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            while (serialPort.BytesToRead > 0)
-            {
-                try
+            //if (serialPort.IsOpen)
+            //{
+                while (serialPort.BytesToRead > 0)
                 {
                     if (size == 0)
                     {
@@ -151,10 +156,7 @@ namespace Cursach.PhysicalLayer
                         CanalManager.RecieveFrame(rFrame);
                     }
                 }
-                catch(TimeoutException)
-                {
-                }
-            }
+            //}
         }
 
         public void WriteToCom(byte[] frame)
@@ -165,13 +167,7 @@ namespace Cursach.PhysicalLayer
             {
                 sBuffer[i] = frame[i - 1];
             }
-            try
-            {
-                serialPort.Write(sBuffer, 0, sBuffer.Length);
-            }
-            catch (TimeoutException)
-            {
-            }
+            serialPort.Write(sBuffer, 0, sBuffer.Length);
         }
     }
 }
