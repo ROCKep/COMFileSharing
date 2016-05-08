@@ -73,6 +73,17 @@ namespace Cursach.DatalinkLayer
             ComManager.WriteToCom(NAK);
         }
 
+        public PhysicalLayer.PortState Connect(string portName, string baudRate, string parity, string dataBits, string stopBits)
+        {
+            PhysicalLayer.PortState portState = ComManager.OpenCom(portName, baudRate, parity, dataBits, stopBits);
+            ComManager.SendDtr();
+            if (ComManager.IsConnected)
+            {
+                return PhysicalLayer.PortState.Connected;
+            }
+            return portState;
+        }
+
         /// <summary>
         /// Отправляет заново информационный кадр
         /// </summary>
@@ -145,6 +156,17 @@ namespace Cursach.DatalinkLayer
                 }
             }
             return check;
+        }
+
+        public void NotConnected()
+        {
+            ComManager.CloseCom();
+            FormsManager.ConnectFail();
+        }
+
+        public void Connected()
+        {
+            FormsManager.ConnectSuccess();
         }
 
         /// <summary>

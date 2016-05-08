@@ -9,7 +9,7 @@
     <Grid>
         <TabControl x:Name="tabControl" HorizontalAlignment="Left" Height="329" VerticalAlignment="Top" Width="519" FontSize="12">
             <TabItem Name="tiSettings" Header="Настройка COM-порта" IsSelected="True">
-                <Grid Background="white" Margin="0,0,0,-10">
+                <Grid Background="white" Margin="0,0,0,-1">
                     <Label Content="COM-порт" HorizontalAlignment="Left" Margin="75,20,0,0" VerticalAlignment="Top" Width="120" Height="30" FontSize="12"/>
                     <Label Content="Скорость (бит/сек)" HorizontalAlignment="Left" Margin="75,60,0,0" VerticalAlignment="Top" Width="120" Height="30" FontSize="12"/>
                     <Label Content="Биты данных" HorizontalAlignment="Left" Margin="75,100,0,0" VerticalAlignment="Top" Width="120" Height="30" FontSize="12"/>

@@ -79,8 +79,8 @@ namespace Cursach
         /// </summary>
         private void butOK_Click(object sender, RoutedEventArgs e)
         {
-            PhysicalLayer.PortState portState = comHandler.OpenCom(
-                cmbCOM.Text,
+            
+            PhysicalLayer.PortState portState = canalHandler.Connect(cmbCOM.Text,
                 cmbBaud.Text,
                 cmbParity.Text,
                 cmbDataBits.Text,
@@ -181,7 +181,7 @@ namespace Cursach
         }
 
         /// <summary>
-        /// Останавливает программу, когда закрылась программа на другом компьютере
+        /// Останавливает программу из-за обрыва соединения
         /// </summary>
         public void ConnectFail()
         {
@@ -190,7 +190,6 @@ namespace Cursach
                 timer.Stop();
             }
             CloseFiles();
-            comHandler.CloseCom();
             Dispatcher.Invoke(new Action(() =>
             {
                 butOK.IsEnabled = true;
@@ -200,29 +199,6 @@ namespace Cursach
                 gbxSendProgress.Visibility = Visibility.Hidden;
                 gbxReceiveProgress.Visibility = Visibility.Hidden;
                 MessageBox.Show("Соединение с другим компьютером прервано");
-            }));
-        }
-
-        /// <summary>
-        /// Останавливает программу из-за обрыва соединения
-        /// </summary>
-        public void ConnectBroke()
-        {
-            if (timer.IsEnabled)
-            {
-                timer.Stop();
-            }
-            CloseFiles();
-            comHandler.CloseCom();
-            Dispatcher.Invoke(new Action(() =>
-            {
-                butOK.IsEnabled = true;
-                lblStatus.Foreground = Brushes.Red;
-                lblStatus.Content = "Порт не открыт";
-                gbxChooseFile.IsEnabled = false;
-                gbxSendProgress.Visibility = Visibility.Hidden;
-                gbxReceiveProgress.Visibility = Visibility.Hidden;
-                MessageBox.Show("Обрыв соединения");
             }));
         }
 

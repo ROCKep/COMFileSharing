@@ -74,18 +74,8 @@ namespace Cursach.PhysicalLayer
                 serialPort.Handshake = Handshake.None;
                 serialPort.ReadTimeout = 500;
                 serialPort.WriteTimeout = 500;
-
                 serialPort.Open();
-                serialPort.DtrEnable = true;
-                if (serialPort.DsrHolding)
-                {
-                    IsConnected = true;
-                    return PortState.Connected;
-                }
-                else
-                {
-                    return PortState.Opened;
-                }
+                return PortState.Opened;
             }
             catch (UnauthorizedAccessException)
             {
@@ -98,6 +88,18 @@ namespace Cursach.PhysicalLayer
             catch (Exception)
             {
                 return PortState.Error;
+            }
+        }
+
+        public void SendDtr()
+        {
+            if (serialPort.IsOpen)
+            {
+                serialPort.DtrEnable = true;
+                if (serialPort.DsrHolding)
+                {
+                    IsConnected = true;
+                }
             }
         }
 
@@ -162,18 +164,18 @@ namespace Cursach.PhysicalLayer
             {
                 case SerialPinChange.Break:
                     IsConnected = false;
-                    FormsManager.ConnectBroke();
+                    CanalManager.NotConnected();
                     break;
                 case SerialPinChange.DsrChanged:
                     if (serialPort.DsrHolding && !IsConnected)
                     {
                         IsConnected = true;
-                        FormsManager.ConnectSuccess();
+                        CanalManager.Connected();
                     }
                     else if (!serialPort.DsrHolding && IsConnected)
                     {
                         IsConnected = false;
-                        FormsManager.ConnectFail();
+                        CanalManager.NotConnected();
                     }
                     break;
             }
