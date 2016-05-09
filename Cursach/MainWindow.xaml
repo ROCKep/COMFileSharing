@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Cursach"
         mc:Ignorable="d"
-        Title="File Transfer" Height="350" Width="350" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" Icon="NetGlobe.ico" Background="White" FontSize="12">
+        Title="File Transfer" Height="350" Width="350" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" Icon="NetGlobe.ico" Background="White" FontSize="12" BorderThickness="2" BorderBrush="Gray">
     <Grid>
         <TabControl x:Name="tabControl" HorizontalAlignment="Left" Height="322" VerticalAlignment="Top" Width="344" FontSize="12">
             <TabItem Header="Главная">
@@ -16,26 +16,17 @@
             </TabItem>
             <TabItem Header="О Программе">
                 <Grid Background="White">
-                    <RichTextBox x:Name="richTextBox1" HorizontalAlignment="Center" Height="290" 
-                                 VerticalAlignment="Top" Width="334" IsEnabled="False" IsReadOnly="True" FontSize="12">
-                        <FlowDocument>
-                            <Paragraph FontWeight="Bold">
-                                <Run Text=""/>
-                            </Paragraph>
-                        </FlowDocument>
-                    </RichTextBox>
+                    <Label Content="Курсовая работа" HorizontalAlignment="Center" Margin="0,60,0,0" VerticalAlignment="Top" Width="120" Height="30" FontSize="12" HorizontalContentAlignment="Center"/>
+                    <Label Content='по дисциплине "Сетевые технологии в АСОИУ"' HorizontalAlignment="Center" Margin="0,85,0,0" VerticalAlignment="Top" Width="290" Height="30" FontSize="12" HorizontalContentAlignment="Center"/>
+                    <Label Content='на тему "Локальная безадаптерная сеть"' HorizontalAlignment="Center" Margin="0,110,0,0" VerticalAlignment="Top" Width="250" Height="30" FontSize="12" HorizontalContentAlignment="Center"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Информация">
                 <Grid Background="White">
-                    <RichTextBox x:Name="richTextBox2" HorizontalAlignment="Center" Height="290" 
-                                 VerticalAlignment="Top" Width="334" IsEnabled="False" IsReadOnly="True" FontSize="12">
-                        <FlowDocument>
-                            <Paragraph FontWeight="Bold">
-                                <Run Text=""/>
-                            </Paragraph>
-                        </FlowDocument>
-                    </RichTextBox>
+                    <Label Content="Исполнители (студенты группы ИУ5-61)" HorizontalAlignment="Center" Margin="0,60,0,0" VerticalAlignment="Top" Width="260" Height="30" FontSize="12" HorizontalContentAlignment="Center"/>
+                    <Label Content="1. Кузлякин А. П. (прикладной уровень)" HorizontalAlignment="Center" Margin="0,90,0,0" VerticalAlignment="Top" Width="250" Height="30" FontSize="12" HorizontalContentAlignment="Center"/>
+                    <Label Content="2. Панкин П. Д. (канальный уровень)" HorizontalAlignment="Center" Margin="0,110,0,0" VerticalAlignment="Top" Width="250" Height="30" FontSize="12" HorizontalContentAlignment="Center"/>
+                    <Label Content="3. Головин И. В. (физический уровень)" HorizontalAlignment="Center" Margin="0,130,0,0" VerticalAlignment="Top" Width="250" Height="30" FontSize="12" HorizontalContentAlignment="Center"/>
                 </Grid>
             </TabItem>
         </TabControl>
