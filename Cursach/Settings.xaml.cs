@@ -88,10 +88,7 @@ namespace Cursach
             switch (portState)
             {
                 case PhysicalLayer.PortState.Connected:
-                    lblStatus.Foreground = Brushes.Green;
-                    lblStatus.Content = "Соединение установлено";
-                    gbxChooseFile.IsEnabled = true;
-                    MessageBox.Show("Соединение с другим компьютером установлено", "Сообщение", MessageBoxButton.OK, MessageBoxImage.Information);
+                    ConnectSuccess();
                     break;
                 case PhysicalLayer.PortState.Opened:
                     lblStatus.Foreground = Brushes.Black;
@@ -201,29 +198,6 @@ namespace Cursach
                 MessageBox.Show("Соединение с другим компьютером прервано", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }));
         }
-
-        /// <summary>
-        /// Останавливает программу из-за обрыва соединения
-        /// </summary>
-        //public void ConnectBroke()
-        //{
-        //    if (timer.IsEnabled)
-        //    {
-        //        timer.Stop();
-        //    }
-        //    CloseFiles();
-        //    comHandler.CloseCom();
-        //    Dispatcher.Invoke(new Action(() =>
-        //    {
-        //        butOK.IsEnabled = true;
-        //        lblStatus.Foreground = Brushes.Red;
-        //        lblStatus.Content = "Порт не открыт";
-        //        gbxChooseFile.IsEnabled = false;
-        //        gbxSendProgress.Visibility = Visibility.Hidden;
-        //        gbxReceiveProgress.Visibility = Visibility.Hidden;
-        //        MessageBox.Show("Обрыв соединения", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-        //    }));
-        //}
 
         /// <summary>
         /// Показывает информацию о том, что соединение установлено
