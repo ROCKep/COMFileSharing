@@ -63,12 +63,11 @@ namespace Cursach
             if (ports.Length == 0)
             {
                 // Configure the message box to be displayed
-                string messageBoxText = "COM-порты отсутствуют.\n Завершение программы.";
-                string caption = "File Transfer";
+                string messageBoxText = "COM-порты отсутствуют.\n Завершение программы";
+                string caption = "Ошибка";
                 MessageBoxButton button = MessageBoxButton.OK;
-                MessageBoxImage icon = MessageBoxImage.Warning;
+                MessageBoxImage icon = MessageBoxImage.Error;
                 Close();
-
                 // Display message box
                 MessageBox.Show(messageBoxText, caption, button, icon);
             }
@@ -92,7 +91,7 @@ namespace Cursach
                     lblStatus.Foreground = Brushes.Green;
                     lblStatus.Content = "Соединение установлено";
                     gbxChooseFile.IsEnabled = true;
-                    MessageBox.Show("Соединение с другим компьютером установлено");
+                    MessageBox.Show("Соединение с другим компьютером установлено", "Сообщение", MessageBoxButton.OK, MessageBoxImage.Information);
                     break;
                 case PhysicalLayer.PortState.Opened:
                     lblStatus.Foreground = Brushes.Black;
@@ -139,7 +138,7 @@ namespace Cursach
                 gbxChooseFile.IsEnabled = false;
                 butOK.IsEnabled = false;
                 gbxSendProgress.Visibility = Visibility.Visible;
-                lblSend.Content = "Передача файла " + Path.GetFileName(sFile.Name) + ":";
+                lblSend.Content = "Передача файла: " + Path.GetFileName(sFile.Name) + ":";
                 pbrSendProgress.Maximum = sFile.Length;
                 pbrSendProgress.Value = 0.0;
                 canalHandler.SendFile(fileName);
@@ -172,7 +171,7 @@ namespace Cursach
         {
             if (sFile != null || rFile != null)
             {
-                MessageBoxResult result = MessageBox.Show("Программа в данный момент занята. Вы действительно хотите выйти из программы?", "Внимание", MessageBoxButton.YesNo);
+                MessageBoxResult result = MessageBox.Show("Программа в данный момент занята. Вы действительно хотите выйти из программы?", "Предупреждение", MessageBoxButton.YesNo, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.No)
                 {
                     e.Cancel = true;
@@ -199,7 +198,7 @@ namespace Cursach
                 gbxChooseFile.IsEnabled = false;
                 gbxSendProgress.Visibility = Visibility.Hidden;
                 gbxReceiveProgress.Visibility = Visibility.Hidden;
-                MessageBox.Show("Соединение с другим компьютером прервано");
+                MessageBox.Show("Соединение с другим компьютером прервано", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }));
         }
 
@@ -222,7 +221,7 @@ namespace Cursach
                 gbxChooseFile.IsEnabled = false;
                 gbxSendProgress.Visibility = Visibility.Hidden;
                 gbxReceiveProgress.Visibility = Visibility.Hidden;
-                MessageBox.Show("Обрыв соединения");
+                MessageBox.Show("Обрыв соединения", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }));
         }
 
@@ -236,7 +235,7 @@ namespace Cursach
                 lblStatus.Foreground = Brushes.Green;
                 lblStatus.Content = "Соединение установлено";
                 gbxChooseFile.IsEnabled = true;
-                MessageBox.Show("Соединение с другим компьютером установлено");
+                MessageBox.Show("Соединение с другим компьютером установлено", "Сообщение", MessageBoxButton.OK, MessageBoxImage.Information);
             }));
         }
 
@@ -248,7 +247,7 @@ namespace Cursach
         {
             Dispatcher.BeginInvoke(new Action(() =>
             {
-                MessageBoxResult result = MessageBox.Show("Принять файл " + fileName + "?", "Сообщение", MessageBoxButton.YesNo);
+                MessageBoxResult result = MessageBox.Show("Принять файл: " + fileName + "?", "Сообщение", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {
                     SaveFile(fileName);
@@ -277,7 +276,7 @@ namespace Cursach
                     rFile = new FileStream(dlg.FileName, FileMode.Create);
                     butOK.IsEnabled = false;
                     gbxReceiveProgress.Visibility = Visibility.Visible;
-                    lblReceive.Content = "Прием файла " + Path.GetFileName(rFile.Name) + ":";
+                    lblReceive.Content = "Прием файла: " + Path.GetFileName(rFile.Name);
                     lblReceiveProgress.Content = "Принято 0 КБ";
                     if (!timer.IsEnabled)
                     {
@@ -320,7 +319,7 @@ namespace Cursach
                 }
                 gbxChooseFile.IsEnabled = true;
                 gbxSendProgress.Visibility = Visibility.Hidden;
-                MessageBox.Show("Передача файла была отменена");
+                MessageBox.Show("Передача файла была отменена", "Сообщение", MessageBoxButton.OK, MessageBoxImage.Information);
             }));
         }
 
@@ -359,7 +358,7 @@ namespace Cursach
                     butOK.IsEnabled = true;
                 }
                 gbxReceiveProgress.Visibility = Visibility.Hidden;
-                MessageBox.Show("Файл успешно принят");
+                MessageBox.Show("Файл успешно принят", "Сообщение", MessageBoxButton.OK, MessageBoxImage.Information);
             }));
         }
 
@@ -378,7 +377,7 @@ namespace Cursach
                 }
                 gbxChooseFile.IsEnabled = true;
                 gbxSendProgress.Visibility = Visibility.Hidden;
-                MessageBox.Show("Файл успешно отправлен");
+                MessageBox.Show("Файл успешно отправлен", "Сообщение", MessageBoxButton.OK, MessageBoxImage.Information);
             }));
         }
 
@@ -405,15 +404,5 @@ namespace Cursach
             }));
             return bytesRead;
         }
-
-
-
-        //public void ShowMessage(string msg)
-        //{
-        //    string caption = "File Transfer";
-        //    MessageBoxButton button = MessageBoxButton.OK;
-        //    MessageBoxImage icon = MessageBoxImage.Information;
-        //    MessageBox.Show(msg, caption, button, icon);
-        //}
     }
 }
