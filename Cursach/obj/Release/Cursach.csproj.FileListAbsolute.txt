@@ -1,0 +1,16 @@
+C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\bin\Release\Cursach.exe.config
+C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\bin\Release\Cursach.exe
+C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\bin\Release\Cursach.pdb
+C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\obj\Release\Cursach.csprojResolveAssemblyReference.cache
+C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\obj\Release\MainWindow.g.cs
+C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\obj\Release\Settings.g.cs
+C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\obj\Release\App.g.cs
+C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\obj\Release\Cursach_MarkupCompile.cache
+C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\obj\Release\Cursach_MarkupCompile.lref
+C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\obj\Release\MainWindow.baml
+C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\obj\Release\Settings.baml
+C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\obj\Release\Cursach.g.resources
+C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\obj\Release\Cursach.Properties.Resources.resources
+C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\obj\Release\Cursach.csproj.GenerateResource.Cache
+C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\obj\Release\Cursach.exe
+C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\obj\Release\Cursach.pdb

@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\obj\Debug\
+C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\obj\Release\
 Cursach
 none
 false
-DEBUG;TRACE
+TRACE
 C:\Users\diabl\Source\Repos\COMFileSharing\Cursach\App.xaml
 21360784759
 
-9777427233
+8-1878516105
 162130521089
 MainWindow.xaml;Settings.xaml;
 
-True
+False
 

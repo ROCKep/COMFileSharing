@@ -78,7 +78,7 @@ namespace Cursach
         /// </summary>
         private void butOK_Click(object sender, RoutedEventArgs e)
         {
-            PhysicalLayer.PortState portState = comHandler.OpenCom(
+            PhysicalLayer.PortState portState = canalHandler.Connect(
                 cmbCOM.Text,
                 cmbBaud.Text,
                 cmbParity.Text,
@@ -205,25 +205,25 @@ namespace Cursach
         /// <summary>
         /// Останавливает программу из-за обрыва соединения
         /// </summary>
-        public void ConnectBroke()
-        {
-            if (timer.IsEnabled)
-            {
-                timer.Stop();
-            }
-            CloseFiles();
-            comHandler.CloseCom();
-            Dispatcher.Invoke(new Action(() =>
-            {
-                butOK.IsEnabled = true;
-                lblStatus.Foreground = Brushes.Red;
-                lblStatus.Content = "Порт не открыт";
-                gbxChooseFile.IsEnabled = false;
-                gbxSendProgress.Visibility = Visibility.Hidden;
-                gbxReceiveProgress.Visibility = Visibility.Hidden;
-                MessageBox.Show("Обрыв соединения", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }));
-        }
+        //public void ConnectBroke()
+        //{
+        //    if (timer.IsEnabled)
+        //    {
+        //        timer.Stop();
+        //    }
+        //    CloseFiles();
+        //    comHandler.CloseCom();
+        //    Dispatcher.Invoke(new Action(() =>
+        //    {
+        //        butOK.IsEnabled = true;
+        //        lblStatus.Foreground = Brushes.Red;
+        //        lblStatus.Content = "Порт не открыт";
+        //        gbxChooseFile.IsEnabled = false;
+        //        gbxSendProgress.Visibility = Visibility.Hidden;
+        //        gbxReceiveProgress.Visibility = Visibility.Hidden;
+        //        MessageBox.Show("Обрыв соединения", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+        //    }));
+        //}
 
         /// <summary>
         /// Показывает информацию о том, что соединение установлено

@@ -84,6 +84,17 @@ namespace Cursach.DatalinkLayer
             return portState;
         }
 
+        public void NotConnected()
+        {
+            ComManager.CloseCom();
+            FormsManager.ConnectFail();
+        }
+
+        public void Connected()
+        {
+            FormsManager.ConnectSuccess();
+        }
+
         /// <summary>
         /// Отправляет заново информационный кадр
         /// </summary>
@@ -156,17 +167,6 @@ namespace Cursach.DatalinkLayer
                 }
             }
             return check;
-        }
-
-        public void NotConnected()
-        {
-            ComManager.CloseCom();
-            FormsManager.ConnectFail();
-        }
-
-        public void Connected()
-        {
-            FormsManager.ConnectSuccess();
         }
 
         /// <summary>
